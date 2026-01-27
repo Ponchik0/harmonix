@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="115" fill="#1a1a1a"/>
+  
+  <!-- Sound wave bars (main logo) - slightly dimmed for sleepy effect -->
+  <rect x="96" y="220" width="28" height="72" rx="14" fill="#606060" opacity="0.6"/>
+  <rect x="140" y="180" width="28" height="152" rx="14" fill="#707070" opacity="0.7"/>
+  <rect x="184" y="140" width="28" height="232" rx="14" fill="#808080" opacity="0.8"/>
+  <rect x="242" y="100" width="28" height="312" rx="14" fill="#909090" opacity="0.9"/>
+  <rect x="300" y="140" width="28" height="232" rx="14" fill="#808080" opacity="0.8"/>
+  <rect x="344" y="180" width="28" height="152" rx="14" fill="#707070" opacity="0.7"/>
+  <rect x="388" y="220" width="28" height="72" rx="14" fill="#606060" opacity="0.6"/>
+  
+  <!-- ZZZ floating -->
+  <g fill="none" stroke="#87ceeb" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 370 130 L 405 130 L 370 165 L 405 165"/>
+    <path d="M 395 85 L 425 85 L 395 115 L 425 115" opacity="0.7"/>
+    <path d="M 415 50 L 440 50 L 415 75 L 440 75" opacity="0.4"/>
+  </g>
+  
+  <!-- Sleepy eyes at bottom -->
+  <path d="M 150 440 Q 190 460 230 440" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.5"/>
+  <path d="M 282 440 Q 322 460 362 440" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.5"/>
+</svg>

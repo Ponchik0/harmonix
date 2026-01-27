@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="115" fill="#1a1a1a"/>
+  
+  <!-- Cat ears -->
+  <polygon points="100,160 145,60 190,160" fill="#a0a0a0"/>
+  <polygon points="115,155 145,80 175,155" fill="#ffb6c1"/>
+  <polygon points="322,160 367,60 412,160" fill="#a0a0a0"/>
+  <polygon points="337,155 367,80 397,155" fill="#ffb6c1"/>
+  
+  <!-- Sound wave bars (main logo) -->
+  <rect x="96" y="220" width="28" height="72" rx="14" fill="#808080" opacity="0.7"/>
+  <rect x="140" y="180" width="28" height="152" rx="14" fill="#909090" opacity="0.85"/>
+  <rect x="184" y="140" width="28" height="232" rx="14" fill="#a0a0a0"/>
+  <rect x="242" y="100" width="28" height="312" rx="14" fill="#b0b0b0"/>
+  <rect x="300" y="140" width="28" height="232" rx="14" fill="#a0a0a0"/>
+  <rect x="344" y="180" width="28" height="152" rx="14" fill="#909090" opacity="0.85"/>
+  <rect x="388" y="220" width="28" height="72" rx="14" fill="#808080" opacity="0.7"/>
+  
+  <!-- Whiskers -->
+  <g stroke="#ffffff" stroke-width="2" opacity="0.6">
+    <line x1="80" y1="420" x2="150" y2="430"/>
+    <line x1="75" y1="445" x2="145" y2="445"/>
+    <line x1="80" y1="470" x2="150" y2="460"/>
+    <line x1="432" y1="420" x2="362" y2="430"/>
+    <line x1="437" y1="445" x2="367" y2="445"/>
+    <line x1="432" y1="470" x2="362" y2="460"/>
+  </g>
+</svg>

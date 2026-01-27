@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="115" fill="#1a1a1a"/>
+  
+  <!-- Sound wave bars (main logo) -->
+  <rect x="96" y="220" width="28" height="72" rx="14" fill="#808080" opacity="0.7"/>
+  <rect x="140" y="180" width="28" height="152" rx="14" fill="#909090" opacity="0.85"/>
+  <rect x="184" y="140" width="28" height="232" rx="14" fill="#a0a0a0"/>
+  <rect x="242" y="100" width="28" height="312" rx="14" fill="#b0b0b0"/>
+  <rect x="300" y="140" width="28" height="232" rx="14" fill="#a0a0a0"/>
+  <rect x="344" y="180" width="28" height="152" rx="14" fill="#909090" opacity="0.85"/>
+  <rect x="388" y="220" width="28" height="72" rx="14" fill="#808080" opacity="0.7"/>
+  
+  <!-- UwU face overlay -->
+  <!-- Blush circles -->
+  <circle cx="120" cy="350" r="35" fill="#ff6b9d" opacity="0.4"/>
+  <circle cx="392" cy="350" r="35" fill="#ff6b9d" opacity="0.4"/>
+  
+  <!-- UwU eyes -->
+  <path d="M 145 420 Q 175 390 205 420" stroke="#ffffff" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M 307 420 Q 337 390 367 420" stroke="#ffffff" stroke-width="10" fill="none" stroke-linecap="round"/>
+  
+  <!-- w mouth -->
+  <path d="M 200 460 Q 228 485 256 460 Q 284 485 312 460" stroke="#ffffff" stroke-width="7" fill="none" stroke-linecap="round"/>
+</svg>

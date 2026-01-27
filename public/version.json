@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "releaseDate": "2025-01-11",
+  "changelog": [
+    "Первый релиз Harmonix",
+    "Поддержка SoundCloud",
+    "Discord Rich Presence",
+    "Кастомизация профиля",
+    "Магазин предметов"
+  ],
+  "downloadUrl": "https://github.com/YOUR_USERNAME/harmonix/releases/latest",
+  "mandatory": false
+}

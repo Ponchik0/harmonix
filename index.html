@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#8B5CF6" />
+    <meta name="description" content="Harmonix - Современный музыкальный плеер" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Poppins:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&family=Ubuntu:wght@400;500;700&family=Comfortaa:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Audiowide&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@400;500;600;700&family=Teko:wght@400;500;600;700&family=Russo+One&display=swap"
+      rel="stylesheet"
+    />
+    <title>Harmonix</title>
+    <style>
+      :root {
+        --bg: #000;
+        --fg: #fff;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      #loading-screen {
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s, visibility 0.5s;
+      }
+      #loading-screen.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+        flex: 1;
+        justify-content: center;
+      }
+
+      .bars {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 64px;
+      }
+
+      .bar {
+        width: 6px;
+        background: var(--fg);
+        border-radius: 3px;
+        animation: sound 1s ease-in-out infinite;
+      }
+
+      .bar:nth-child(1) {
+        height: 24px;
+        animation-delay: 0s;
+      }
+      .bar:nth-child(2) {
+        height: 40px;
+        animation-delay: 0.1s;
+      }
+      .bar:nth-child(3) {
+        height: 56px;
+        animation-delay: 0.2s;
+      }
+      .bar:nth-child(4) {
+        height: 64px;
+        animation-delay: 0.3s;
+      }
+      .bar:nth-child(5) {
+        height: 56px;
+        animation-delay: 0.4s;
+      }
+      .bar:nth-child(6) {
+        height: 40px;
+        animation-delay: 0.5s;
+      }
+      .bar:nth-child(7) {
+        height: 24px;
+        animation-delay: 0.6s;
+      }
+
+      .name {
+        font-family: "Inter", sans-serif;
+        font-size: 24px;
+        font-weight: 500;
+        color: var(--fg);
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        opacity: 0.9;
+      }
+
+      .telegram {
+        width: 100%;
+        max-width: 400px;
+        padding: 32px;
+        padding-bottom: 48px;
+      }
+
+      .telegram a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 16px 24px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        color: var(--fg);
+        text-decoration: none;
+        font-family: "Inter", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .telegram a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: scale(1.02);
+      }
+
+      .telegram svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+      }
+
+      @keyframes sound {
+        0%,
+        100% {
+          transform: scaleY(0.3);
+          opacity: 0.4;
+        }
+        50% {
+          transform: scaleY(1);
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loading-screen">
+      <div class="loader">
+        <div class="bars">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+        <div class="name">Harmonix</div>
+      </div>
+      <div class="telegram">
+        <a href="https://t.me/harmonixlol" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.442-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.121.099.155.232.171.326.016.094.036.308.02.475z"/>
+          </svg>
+          <span>Наш Telegram канал</span>
+        </a>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Регистрация Service Worker для PWA
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('[PWA] Service Worker registered'))
+            .catch(err => console.log('[PWA] SW registration failed:', err));
+        });
+      }
+    </script>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("harmonix-theme");
+          if (t && t.startsWith("light")) {
+            document.documentElement.style.setProperty("--bg", "#fff");
+            document.documentElement.style.setProperty("--fg", "#000");
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,459 @@
+{
+  "banners": [
+    {
+      "id": "banner_01",
+      "name": "Фиолетовый",
+      "description": "Глубокий фиолет",
+      "category": "banners",
+      "price": 100,
+      "preview": "/banners/banner_01.jpg",
+      "rarity": "common",
+      "type": "image"
+    },
+    {
+      "id": "banner_02",
+      "name": "Jade",
+      "description": "Нежный стиль",
+      "category": "banners",
+      "price": 100,
+      "preview": "/banners/banner_02.jpg",
+      "rarity": "common",
+      "type": "image"
+    },
+    {
+      "id": "banner_06",
+      "name": "Discord",
+      "description": "Классика",
+      "category": "banners",
+      "price": 150,
+      "preview": "/banners/banner_06.jpg",
+      "rarity": "common",
+      "type": "image"
+    },
+    {
+      "id": "banner_08",
+      "name": "Скачать 1",
+      "description": "Минимализм",
+      "category": "banners",
+      "price": 150,
+      "preview": "/banners/banner_08.jpg",
+      "rarity": "common",
+      "type": "image"
+    },
+    {
+      "id": "banner_10",
+      "name": "Скачать 2",
+      "description": "Стильный",
+      "category": "banners",
+      "price": 150,
+      "preview": "/banners/banner_10.jpg",
+      "rarity": "common",
+      "type": "image"
+    },
+    {
+      "id": "banner_12",
+      "name": "Скачать 3",
+      "description": "Атмосферный",
+      "category": "banners",
+      "price": 150,
+      "preview": "/banners/banner_12.jpg",
+      "rarity": "common",
+      "type": "image"
+    },
+    {
+      "id": "banner_14",
+      "name": "Скачать 4",
+      "description": "Красивый",
+      "category": "banners",
+      "price": 150,
+      "preview": "/banners/banner_14.jpg",
+      "rarity": "common",
+      "type": "image"
+    },
+    {
+      "id": "banner_16",
+      "name": "Скачать 5",
+      "description": "Эстетика",
+      "category": "banners",
+      "price": 150,
+      "preview": "/banners/banner_16.jpg",
+      "rarity": "common",
+      "type": "image"
+    },
+    {
+      "id": "banner_18",
+      "name": "Скачать 6",
+      "description": "Уютный",
+      "category": "banners",
+      "price": 150,
+      "preview": "/banners/banner_18.jpg",
+      "rarity": "common",
+      "type": "image"
+    },
+    {
+      "id": "banner_19",
+      "name": "Скачать 7",
+      "description": "Тёмный",
+      "category": "banners",
+      "price": 200,
+      "preview": "/banners/banner_19.jpg",
+      "rarity": "common",
+      "type": "image"
+    },
+    {
+      "id": "banner_21",
+      "name": "DS",
+      "description": "Игровой",
+      "category": "banners",
+      "price": 200,
+      "preview": "/banners/banner_21.jpg",
+      "rarity": "common",
+      "type": "image"
+    },
+    {
+      "id": "banner_22",
+      "name": "Gachiakuta",
+      "description": "Манга стиль",
+      "category": "banners",
+      "price": 300,
+      "preview": "/banners/banner_22.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "banner_23",
+      "name": "Gandonio",
+      "description": "Тёмный арт",
+      "category": "banners",
+      "price": 300,
+      "preview": "/banners/banner_23.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "banner_24",
+      "name": "High School DXD",
+      "description": "Аниме",
+      "category": "banners",
+      "price": 350,
+      "preview": "/banners/banner_24.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "banner_26",
+      "name": "Garfield",
+      "description": "Мемный кот",
+      "category": "banners",
+      "price": 300,
+      "preview": "/banners/banner_26.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "banner_27",
+      "name": "Medicine",
+      "description": "Романтика",
+      "category": "banners",
+      "price": 350,
+      "preview": "/banners/banner_27.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "banner_28",
+      "name": "Walk",
+      "description": "Прогулка",
+      "category": "banners",
+      "price": 300,
+      "preview": "/banners/banner_28.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "banner_30",
+      "name": "XD",
+      "description": "Весёлый",
+      "category": "banners",
+      "price": 300,
+      "preview": "/banners/banner_30.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "banner_34",
+      "name": "Гроза садика",
+      "description": "Русский стиль",
+      "category": "banners",
+      "price": 400,
+      "preview": "/banners/banner_34.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "banner_35",
+      "name": "Звезда",
+      "description": "Космос",
+      "category": "banners",
+      "price": 400,
+      "preview": "/banners/banner_35.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "banner_36",
+      "name": "Символ",
+      "description": "Мистика",
+      "category": "banners",
+      "price": 500,
+      "preview": "/banners/banner_36.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "banner_03",
+      "name": "Cotton Aesthetic",
+      "description": "Анимированная эстетика",
+      "category": "banners",
+      "price": 600,
+      "preview": "/banners/banner_03.gif",
+      "rarity": "epic",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_04",
+      "name": "Alucard",
+      "description": "Носферату",
+      "category": "banners",
+      "price": 700,
+      "preview": "/banners/banner_04.gif",
+      "rarity": "epic",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_05",
+      "name": "Pixel Art",
+      "description": "Пиксельная анимация",
+      "category": "banners",
+      "price": 600,
+      "preview": "/banners/banner_05.gif",
+      "rarity": "epic",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_07",
+      "name": "Анимация 1",
+      "description": "Движение",
+      "category": "banners",
+      "price": 600,
+      "preview": "/banners/banner_07.gif",
+      "rarity": "epic",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_09",
+      "name": "Анимация 2",
+      "description": "Плавная",
+      "category": "banners",
+      "price": 650,
+      "preview": "/banners/banner_09.gif",
+      "rarity": "epic",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_11",
+      "name": "Анимация 3",
+      "description": "Яркая",
+      "category": "banners",
+      "price": 650,
+      "preview": "/banners/banner_11.gif",
+      "rarity": "epic",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_13",
+      "name": "Анимация 4",
+      "description": "Стильная",
+      "category": "banners",
+      "price": 700,
+      "preview": "/banners/banner_13.gif",
+      "rarity": "epic",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_15",
+      "name": "Анимация 5",
+      "description": "Крутая",
+      "category": "banners",
+      "price": 700,
+      "preview": "/banners/banner_15.gif",
+      "rarity": "epic",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_17",
+      "name": "Анимация 6",
+      "description": "Динамичная",
+      "category": "banners",
+      "price": 750,
+      "preview": "/banners/banner_17.gif",
+      "rarity": "epic",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_20",
+      "name": "Скачать GIF",
+      "description": "Анимированный",
+      "category": "banners",
+      "price": 800,
+      "preview": "/banners/banner_20.gif",
+      "rarity": "epic",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_29",
+      "name": "Tokyo Ghoul",
+      "description": "Канеки в снегу",
+      "category": "banners",
+      "price": 900,
+      "preview": "/banners/banner_29.gif",
+      "rarity": "epic",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_25",
+      "name": "Gojo Satoru",
+      "description": "Nah I'd Win",
+      "category": "banners",
+      "price": 1500,
+      "preview": "/banners/banner_25.gif",
+      "rarity": "legendary",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_31",
+      "name": "Yoruichi",
+      "description": "Bleach TYBW",
+      "category": "banners",
+      "price": 2000,
+      "preview": "/banners/banner_31.jpg",
+      "rarity": "legendary",
+      "type": "image"
+    },
+    {
+      "id": "banner_32",
+      "name": "Yuta Kenjaku",
+      "description": "Jujutsu Kaisen",
+      "category": "banners",
+      "price": 2500,
+      "preview": "/banners/banner_32.gif",
+      "rarity": "legendary",
+      "type": "animated",
+      "animated": true
+    },
+    {
+      "id": "banner_33",
+      "name": "Yuta Special",
+      "description": "Эксклюзив",
+      "category": "banners",
+      "price": 3000,
+      "preview": "/banners/banner_33.gif",
+      "rarity": "legendary",
+      "type": "animated",
+      "animated": true
+    }
+  ],
+  "frames": [],
+  "titles": [
+    {
+      "id": "title_01",
+      "name": "Harmonix",
+      "description": "Эксклюзивный титул",
+      "category": "titles",
+      "price": 200,
+      "preview": "/titles/photo_2026-01-10_22-16-50.jpg",
+      "rarity": "legendary",
+      "color": "#a855f7",
+      "isImageTitle": true,
+      "image": "/titles/photo_2026-01-10_22-16-50.jpg"
+    }
+  ],
+  "backgrounds": [
+    {
+      "id": "mini_bg_banner_01",
+      "name": "Фиолетовый баннер",
+      "description": "Фон для мини-профиля",
+      "category": "backgrounds",
+      "price": 200,
+      "preview": "/banners/banner_01.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "mini_bg_banner_06",
+      "name": "Discord баннер",
+      "description": "Фон для мини-профиля",
+      "category": "backgrounds",
+      "price": 250,
+      "preview": "/banners/banner_06.jpg",
+      "rarity": "rare",
+      "type": "image"
+    },
+    {
+      "id": "mini_bg_banner_22",
+      "name": "Gachiakuta баннер",
+      "description": "Фон для мини-профиля",
+      "category": "backgrounds",
+      "price": 400,
+      "preview": "/banners/banner_22.jpg",
+      "rarity": "epic",
+      "type": "image"
+    },
+    {
+      "id": "mini_bg_banner_27",
+      "name": "Medicine баннер",
+      "description": "Фон для мини-профиля",
+      "category": "backgrounds",
+      "price": 500,
+      "preview": "/banners/banner_27.jpg",
+      "rarity": "epic",
+      "type": "image"
+    },
+    {
+      "id": "mini_bg_banner_35",
+      "name": "Звезда баннер",
+      "description": "Фон для мини-профиля",
+      "category": "backgrounds",
+      "price": 600,
+      "preview": "/banners/banner_35.jpg",
+      "rarity": "legendary",
+      "type": "image"
+    }
+  ],
+  "packs": [],
+  "usernames": [
+    {
+      "id": "username_slot",
+      "name": "+1 Юзернейм",
+      "description": "Дополнительный слот для юзернейма",
+      "category": "usernames",
+      "price": 200,
+      "rarity": "rare",
+      "icon": "HiOutlineAtSymbol",
+      "dynamic_price": true
+    }
+  ]
+}
+

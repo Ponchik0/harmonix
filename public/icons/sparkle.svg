@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="115" fill="#1a1a1a"/>
+  
+  <!-- Sound wave bars (main logo) -->
+  <rect x="96" y="220" width="28" height="72" rx="14" fill="#808080" opacity="0.7"/>
+  <rect x="140" y="180" width="28" height="152" rx="14" fill="#909090" opacity="0.85"/>
+  <rect x="184" y="140" width="28" height="232" rx="14" fill="#a0a0a0"/>
+  <rect x="242" y="100" width="28" height="312" rx="14" fill="#b0b0b0"/>
+  <rect x="300" y="140" width="28" height="232" rx="14" fill="#a0a0a0"/>
+  <rect x="344" y="180" width="28" height="152" rx="14" fill="#909090" opacity="0.85"/>
+  <rect x="388" y="220" width="28" height="72" rx="14" fill="#808080" opacity="0.7"/>
+  
+  <!-- Sparkles/Stars -->
+  <g fill="#ffd700">
+    <polygon points="100,100 105,115 120,115 108,125 113,140 100,130 87,140 92,125 80,115 95,115" opacity="0.9"/>
+    <polygon points="420,80 424,92 436,92 426,100 430,112 420,104 410,112 414,100 404,92 416,92" opacity="0.7"/>
+    <polygon points="90,420 94,432 106,432 96,440 100,452 90,444 80,452 84,440 74,432 86,432" opacity="0.6"/>
+    <polygon points="430,380 433,389 442,389 435,395 438,404 430,398 422,404 425,395 418,389 427,389" opacity="0.8"/>
+  </g>
+  
+  <!-- Small dots -->
+  <circle cx="380" cy="150" r="4" fill="#ffffff" opacity="0.5"/>
+  <circle cx="130" cy="380" r="3" fill="#ffffff" opacity="0.4"/>
+  <circle cx="400" cy="450" r="5" fill="#ffffff" opacity="0.3"/>
+</svg>

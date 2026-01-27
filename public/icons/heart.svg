@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="115" fill="#1a1a1a"/>
+  
+  <!-- Sound wave bars (main logo) -->
+  <rect x="96" y="220" width="28" height="72" rx="14" fill="#808080" opacity="0.7"/>
+  <rect x="140" y="180" width="28" height="152" rx="14" fill="#909090" opacity="0.85"/>
+  <rect x="184" y="140" width="28" height="232" rx="14" fill="#a0a0a0"/>
+  <rect x="242" y="100" width="28" height="312" rx="14" fill="#b0b0b0"/>
+  <rect x="300" y="140" width="28" height="232" rx="14" fill="#a0a0a0"/>
+  <rect x="344" y="180" width="28" height="152" rx="14" fill="#909090" opacity="0.85"/>
+  <rect x="388" y="220" width="28" height="72" rx="14" fill="#808080" opacity="0.7"/>
+  
+  <!-- Hearts floating around -->
+  <g fill="#ff6b9d" opacity="0.7">
+    <path d="M 80 120 C 80 100, 100 90, 110 105 C 120 90, 140 100, 140 120 C 140 145, 110 170, 110 170 C 110 170, 80 145, 80 120"/>
+    <path d="M 380 100 C 380 85, 395 78, 402 88 C 409 78, 424 85, 424 100 C 424 118, 402 135, 402 135 C 402 135, 380 118, 380 100" opacity="0.5"/>
+    <path d="M 420 400 C 420 380, 440 370, 450 385 C 460 370, 480 380, 480 400 C 480 425, 450 450, 450 450 C 450 450, 420 425, 420 400" opacity="0.6"/>
+  </g>
+</svg>

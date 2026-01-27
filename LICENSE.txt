@@ -1,0 +1,45 @@
+ЛИЦЕНЗИОННОЕ СОГЛАШЕНИЕ HARMONIX
+
+Copyright © 2025 Harmonix. Все права защищены.
+
+УСЛОВИЯ ИСПОЛЬЗОВАНИЯ:
+
+1. ПРЕДОСТАВЛЕНИЕ ЛИЦЕНЗИИ
+   Данное программное обеспечение предоставляется бесплатно для личного использования.
+
+2. ОГРАНИЧЕНИЯ
+   - Запрещено распространение модифицированных версий
+   - Запрещено коммерческое использование без разрешения
+   - Запрещено удаление информации об авторских правах
+
+3. ОТКАЗ ОТ ГАРАНТИЙ
+   Программное обеспечение предоставляется "как есть" без каких-либо гарантий.
+
+4. ОГРАНИЧЕНИЕ ОТВЕТСТВЕННОСТИ
+   Авторы не несут ответственности за любой ущерб, связанный с использованием данного ПО.
+
+Нажимая "Принять", вы соглашаетесь с условиями данного лицензионного соглашения.
+
+---
+
+HARMONIX LICENSE AGREEMENT
+
+Copyright © 2025 Harmonix. All rights reserved.
+
+TERMS OF USE:
+
+1. LICENSE GRANT
+   This software is provided free of charge for personal use.
+
+2. RESTRICTIONS
+   - Distribution of modified versions is prohibited
+   - Commercial use without permission is prohibited
+   - Removal of copyright information is prohibited
+
+3. DISCLAIMER OF WARRANTIES
+   The software is provided "as is" without any warranties.
+
+4. LIMITATION OF LIABILITY
+   The authors are not liable for any damages related to the use of this software.
+
+By clicking "Accept", you agree to the terms of this license agreement.
