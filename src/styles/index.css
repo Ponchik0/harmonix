@@ -344,18 +344,20 @@
     transition: transform 0.1s ease;
   }
 
-  /* ========== TRACK ROW - Smooth ========== */
+  /* ========== TRACK ROW - Fluid ========== */
   .track-row {
     display: flex;
     align-items: center;
     gap: 16px;
     padding: 10px 14px;
-    border-radius: 10px;
-    transition: background 0.15s ease;
+    border-radius: 12px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
   }
 
   .track-row:hover {
     background: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 2px 0 0 var(--interactive-accent, rgba(255, 255, 255, 0.3));
   }
 
   .track-row:hover .track-artwork {
@@ -462,13 +464,23 @@
     -webkit-app-region: no-drag;
   }
 
-  /* Text utilities - Minimal */
+  /* Text utilities - Fluid Modern */
   .text-gradient {
-    color: rgba(255, 255, 255, 0.9);
+    background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.6) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gradient-accent {
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--interactive-accent, #ffffff) 50%, rgba(255, 255, 255, 0.5) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .text-glow {
-    text-shadow: none;
+    text-shadow: 0 0 20px var(--glow-color, rgba(255, 255, 255, 0.1));
   }
 
   /* Spacing */
@@ -748,14 +760,193 @@
   transition: transform 0.08s ease;
 }
 
-/* Hero gradient - Removed */
+/* Hero gradient - Fluid */
 .hero-gradient {
-  background: transparent;
+  background: 
+    radial-gradient(ellipse at 20% 50%, var(--fluid-gradient-1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, var(--fluid-gradient-2) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, var(--fluid-gradient-3) 0%, transparent 50%);
+  background-size: 200% 200%;
+  animation: auroraFlow var(--aurora-speed, 8s) ease infinite alternate;
 }
 
-/* Shadow glow - Removed */
+/* Shadow glow - Fluid */
 .shadow-glow {
-  box-shadow: none;
+  box-shadow: 0 0 30px var(--glow-color, rgba(255, 255, 255, 0.08));
+}
+
+/* ========== FLUID DESIGN SYSTEM ========== */
+
+/* Aurora mesh background */
+.aurora-bg {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 20% 50%, var(--fluid-gradient-1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, var(--fluid-gradient-2) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, var(--fluid-gradient-3) 0%, transparent 50%);
+  background-size: 200% 200%;
+  animation: auroraFlow var(--aurora-speed, 8s) ease infinite alternate;
+  opacity: var(--aurora-intensity, 0.12);
+  pointer-events: none;
+  will-change: background-position;
+}
+
+/* Fluid blob */
+.fluid-blob {
+  position: absolute;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  animation: blobMorph 12s ease-in-out infinite;
+  filter: blur(var(--blob-blur, 80px));
+  opacity: 0.1;
+  pointer-events: none;
+  will-change: transform, border-radius;
+}
+
+/* Glass fluid - enhanced glassmorphism */
+.glass-fluid {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Card fluid - modern card with hover effects */
+.card-fluid {
+  border-radius: var(--fluid-radius, 28px);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-fluid:hover {
+  transform: translateY(-4px) scale(1.01);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 15px var(--glow-color, rgba(255, 255, 255, 0.05));
+}
+
+/* Shimmer glass sweep effect */
+.card-fluid::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  transform: translateX(-100%) skewX(-15deg);
+  pointer-events: none;
+  transition: none;
+}
+
+.card-fluid:hover::after {
+  animation: shimmerGlass 0.8s ease forwards;
+}
+
+/* Liquid border with animated gradient */
+.liquid-border {
+  position: relative;
+}
+
+.liquid-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  pointer-events: none;
+}
+
+/* Gradient divider */
+.gradient-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+}
+
+/* Hover fluid - organic hover effect */
+.hover-fluid {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.hover-fluid:hover {
+  transform: translateY(-3px) scale(1.01) rotate(-0.3deg);
+}
+
+.hover-fluid:active {
+  transform: translateY(-1px) scale(0.99);
+  transition: transform 0.1s ease;
+}
+
+/* Glow ring animation */
+.glow-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  animation: glowBreathe 3s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Fluid keyframe animations */
+@keyframes auroraFlow {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 0%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes blobMorph {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50% { border-radius: 50% 60% 30% 60% / 30% 40% 70% 60%; }
+  75% { border-radius: 40% 60% 50% 40% / 60% 50% 40% 70%; }
+}
+
+@keyframes fluidShift {
+  0% { background-position: 0% 50%; background-size: 200% 200%; }
+  50% { background-position: 100% 50%; background-size: 250% 250%; }
+  100% { background-position: 0% 50%; background-size: 200% 200%; }
+}
+
+@keyframes glowBreathe {
+  0%, 100% { box-shadow: 0 0 20px var(--glow-color, rgba(255,255,255,0.08)); opacity: 0.5; }
+  50% { box-shadow: 0 0 40px var(--glow-color, rgba(255,255,255,0.15)); opacity: 1; }
+}
+
+@keyframes shimmerGlass {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(400%) skewX(-15deg); }
+}
+
+@keyframes floatRotate {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(1.5deg); }
+  66% { transform: translateY(-5px) rotate(-1deg); }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-bg,
+  .fluid-blob,
+  .card-fluid::after,
+  .glow-ring {
+    animation: none !important;
+  }
+  .card-fluid:hover,
+  .hover-fluid:hover {
+    transform: none !important;
+  }
 }
 
 /* Font display */
@@ -955,12 +1146,16 @@ select {
   outline-offset: 2px;
 }
 
-/* ========== TOAST - Minimal ========== */
+/* ========== TOAST - Fluid Glass ========== */
 .toast {
-  background: #141414;
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
   padding: 14px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 /* ========== SELECT OPTIONS DARK THEME ========== */

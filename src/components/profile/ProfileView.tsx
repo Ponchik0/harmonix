@@ -285,7 +285,6 @@ export function ProfileView() {
         backgroundImage: `url(${user.miniProfileBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
       };
     }
     
@@ -302,7 +301,6 @@ export function ProfileView() {
           backgroundImage: `url(${equippedBackground.preview})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
         };
       }
       return { background: equippedBackground.preview };
@@ -347,7 +345,7 @@ export function ProfileView() {
 
   return (
     <div
-      className="h-full overflow-y-auto scrollbar-hide pb-32 relative"
+      className="h-full overflow-hidden relative"
       style={getBackgroundStyle()}
     >
       {/* Banner Card - with rounded corners and margin */}
@@ -595,6 +593,65 @@ export function ProfileView() {
             <PinnedContentInline onEditClick={() => setModal("pins")} />
           </div>
           
+          {/* Socials Row - inside blur container */}
+          {user.socials && Object.values(user.socials).some(Boolean) && (
+            <div
+              className="flex items-center flex-wrap gap-2 mt-3 pt-3"
+              style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}
+            >
+              {user.socials.telegram && (
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(user.socials!.telegram!);
+                    window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Telegram скопирован!', type: 'success' } }));
+                  }}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition-all"
+                  style={{ background: "rgba(0, 136, 204, 0.1)" }}
+                >
+                  <FaTelegram className="w-3.5 h-3.5" style={{ color: "#0088cc" }} />
+                  <span className="text-xs" style={{ color: "#0088cc" }}>@{user.socials.telegram}</span>
+                </button>
+              )}
+              {user.socials.discord && (
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(user.socials!.discord!);
+                    window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Discord скопирован!', type: 'success' } }));
+                  }}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition-all"
+                  style={{ background: "rgba(88, 101, 242, 0.1)" }}
+                >
+                  <IoLogoDiscord className="w-3.5 h-3.5" style={{ color: "#5865F2" }} />
+                  <span className="text-xs" style={{ color: "#5865F2" }}>{user.socials.discord}</span>
+                </button>
+              )}
+              {user.socials.youtube && (
+                <a
+                  href={user.socials.youtube.startsWith('http') ? user.socials.youtube : `https://youtube.com/@${user.socials.youtube}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition-all"
+                  style={{ background: "rgba(255, 0, 0, 0.1)" }}
+                >
+                  <IoLogoYoutube className="w-3.5 h-3.5" style={{ color: "#FF0000" }} />
+                  <span className="text-xs" style={{ color: "#FF0000" }}>{user.socials.youtube}</span>
+                </a>
+              )}
+              {user.socials.tiktok && (
+                <a
+                  href={`https://tiktok.com/@${user.socials.tiktok.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition-all"
+                  style={{ background: "rgba(255,255,255,0.05)" }}
+                >
+                  <FaTiktok className="w-3.5 h-3.5" style={{ color: "rgba(255,255,255,0.7)" }} />
+                  <span className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>@{user.socials.tiktok}</span>
+                </a>
+              )}
+            </div>
+          )}
+
           {/* Friends & Stats row inside blur container */}
           <div className="flex items-center gap-3 mt-3 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
             {/* Friends button */}
@@ -692,64 +749,7 @@ export function ProfileView() {
           </button>
         </div>
 
-        {/* Socials Row */}
-        {user.socials && Object.values(user.socials).some(Boolean) && (
-          <div
-            className="flex items-center flex-wrap gap-2 mt-4 pt-4"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-          >
-              {user.socials.telegram && (
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(user.socials!.telegram!);
-                    window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Telegram скопирован!', type: 'success' } }));
-                  }}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition-all"
-                  style={{ background: "rgba(0, 136, 204, 0.1)" }}
-                >
-                  <FaTelegram className="w-3.5 h-3.5" style={{ color: "#0088cc" }} />
-                  <span className="text-xs" style={{ color: "#0088cc" }}>@{user.socials.telegram}</span>
-                </button>
-              )}
-              {user.socials.discord && (
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(user.socials!.discord!);
-                    window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Discord скопирован!', type: 'success' } }));
-                  }}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition-all"
-                  style={{ background: "rgba(88, 101, 242, 0.1)" }}
-                >
-                  <IoLogoDiscord className="w-3.5 h-3.5" style={{ color: "#5865F2" }} />
-                  <span className="text-xs" style={{ color: "#5865F2" }}>{user.socials.discord}</span>
-                </button>
-              )}
-              {user.socials.youtube && (
-                <a
-                  href={user.socials.youtube.startsWith('http') ? user.socials.youtube : `https://youtube.com/@${user.socials.youtube}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition-all"
-                  style={{ background: "rgba(255, 0, 0, 0.1)" }}
-                >
-                  <IoLogoYoutube className="w-3.5 h-3.5" style={{ color: "#FF0000" }} />
-                  <span className="text-xs" style={{ color: "#FF0000" }}>{user.socials.youtube}</span>
-                </a>
-              )}
-              {user.socials.tiktok && (
-                <a
-                  href={`https://tiktok.com/@${user.socials.tiktok.replace('@', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition-all"
-                  style={{ background: "rgba(255,255,255,0.05)" }}
-                >
-                  <FaTiktok className="w-3.5 h-3.5" style={{ color: "rgba(255,255,255,0.7)" }} />
-                  <span className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>@{user.socials.tiktok}</span>
-                </a>
-              )}
-          </div>
-        )}
+
       </div>
 
       {/* News Card */}
@@ -910,59 +910,55 @@ export function ProfileView() {
       {/* Settings Modal */}
       {modal === "settings" && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
           onClick={() => setModal(null)}
         >
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/70" />
           <div
-            className="relative w-full max-w-md max-h-[80vh] rounded-2xl overflow-hidden"
+            className="relative w-full max-w-[400px] max-h-[85vh] rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col"
             style={{
-              background: "#0a0a0a",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: "#111111",
+              boxShadow: '0 -8px 40px rgba(0,0,0,0.4)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="flex items-center justify-between p-4 border-b"
-              style={{ borderColor: "rgba(255,255,255,0.06)" }}
-            >
-              <h3
-                className="text-lg font-semibold"
-                style={{ color: "rgba(255,255,255,0.9)" }}
-              >
-                Настройки
-              </h3>
+            {/* Drag indicator */}
+            <div className="flex justify-center pt-2 pb-1 sm:hidden">
+              <div className="w-8 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
+            </div>
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3">
+              <h3 className="text-[15px] font-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>Настройки профиля</h3>
               <button
                 onClick={() => setModal(null)}
-                className="p-2 rounded-lg hover:bg-white/5"
+                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/[0.06] transition-colors"
               >
-                <HiOutlineXMark
-                  className="w-5 h-5"
-                  style={{ color: "rgba(255,255,255,0.5)" }}
-                />
+                <HiOutlineXMark className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.4)' }} />
               </button>
             </div>
-            <div className="overflow-y-auto max-h-[calc(80vh-60px)] p-4">
+            <div className="overflow-y-auto flex-1 overscroll-contain" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.08) transparent' }}>
               <ProfileSettings />
               
               {/* Любимые треки в профиле */}
-              <div className="mt-4 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <HiOutlineHeart className="w-4 h-4" style={{ color: colors.accent }} />
-                    <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Любимые треки в профиле</span>
+              <div className="px-4 py-3 flex items-center justify-between" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: `${colors.accent}15` }}>
+                    <HiOutlineHeart className="w-3.5 h-3.5" style={{ color: colors.accent }} />
                   </div>
-                  <button
-                    onClick={() => setModal("pins")}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
-                    style={{ background: `${colors.accent}20`, color: colors.accent }}
-                  >
-                    Изменить
-                  </button>
+                  <div>
+                    <span className="text-[13px] font-medium block" style={{ color: 'rgba(255,255,255,0.8)' }}>Любимые треки</span>
+                    <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>Отображаются в профиле</span>
+                  </div>
                 </div>
-                <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Выберите треки которые будут отображаться в вашем профиле
-                </p>
+                <button
+                  onClick={() => setModal("pins")}
+                  className="px-2.5 py-1 rounded text-[11px] font-medium transition-all"
+                  style={{ background: `${colors.accent}15`, color: colors.accent }}
+                >
+                  Изменить
+                </button>
+              </div>
+              <div className="px-4 pb-3">
                 <PinnedTracksPreview />
               </div>
             </div>

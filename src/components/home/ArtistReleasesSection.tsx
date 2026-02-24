@@ -56,7 +56,7 @@ export function ArtistReleasesSection() {
     try {
       for (const artist of subscriptions.slice(0, 5)) { // Limit to 5 artists
         const artistId = artist.id.replace('sc-user-', '');
-        const tracks = await soundCloudService.getUserTracks(artistId, 5);
+        const tracks = await soundCloudService.getUserTracks(artistId, 5, artist.name);
         
         for (const track of tracks) {
           // Add recent tracks (use current time as release date)

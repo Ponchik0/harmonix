@@ -135,4 +135,7 @@ export interface Playlist {
   createdAt: string;
   updatedAt: string;
   source?: string; // soundcloud, youtube, local, etc.
+  sourceUrl?: string; // Original URL for refreshing (e.g., SoundCloud playlist/likes URL)
+  lastRefreshDate?: string; // ISO timestamp of last refresh to track new content
+  sourceUserId?: string; // User ID for likes playlists (more reliable than URL)
 }

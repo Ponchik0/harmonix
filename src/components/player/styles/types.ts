@@ -53,6 +53,9 @@ export interface PlayerBarProps {
   onVolDragEnd: () => void;
   onExpand: () => void;
   onTrackClick: () => void;
+  onArtistClick: () => void;
+  isArtistVerified: boolean;
+  isLoadingArtist: boolean;
   onSpeedClick: () => void;
   onEqualizerClick: () => void;
   onSpeedChange: (speed: number) => void;

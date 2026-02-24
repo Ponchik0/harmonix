@@ -12,7 +12,7 @@ import {
   IoShuffle,
   IoRepeat,
 } from "react-icons/io5";
-import { HiOutlinePlay, HiOutlinePause } from "react-icons/hi2";
+import { HiOutlinePlay, HiOutlinePause, HiOutlineCheckBadge } from "react-icons/hi2";
 import { PlayerBarProps } from "./types";
 
 export const PlayerBarCompact = memo(function PlayerBarCompact({
@@ -42,6 +42,8 @@ export const PlayerBarCompact = memo(function PlayerBarCompact({
   onVolDragEnd,
   onExpand,
   onTrackClick,
+  onArtistClick,
+  isArtistVerified,
   formatTime,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   playbackSpeed: _playbackSpeed,
@@ -106,7 +108,7 @@ export const PlayerBarCompact = memo(function PlayerBarCompact({
                   boxShadow: `0 4px 16px ${colors.accent}30, 0 2px 8px rgba(0,0,0,0.3)`,
                 }}
               >
-                {artworkUrl && artworkUrl !== "/icon.svg" ? (
+                {artworkUrl ? (
                   <img 
                     src={artworkUrl} 
                     alt="" 
@@ -117,7 +119,7 @@ export const PlayerBarCompact = memo(function PlayerBarCompact({
                   />
                 ) : null}
                 {/* Transparent background when no artwork */}
-                {(!artworkUrl || artworkUrl === "/icon.svg") && (
+                {!artworkUrl && (
                   <div className="absolute inset-0 bg-white/5" />
                 )}
                 {displayPlaying && (
@@ -142,9 +144,12 @@ export const PlayerBarCompact = memo(function PlayerBarCompact({
                 <p className="text-sm font-semibold truncate leading-tight" style={{ color: colors.textPrimary }}>
                   {currentTrack.title}
                 </p>
-                <p className="text-xs truncate leading-tight mt-0.5" style={{ color: colors.textSecondary }}>
-                  {currentTrack.artist}
-                </p>
+                <div className="flex items-center gap-1 min-w-0">
+                  <p className="text-xs truncate leading-tight mt-0.5 cursor-pointer hover:underline transition-all" style={{ color: colors.textSecondary }} onClick={(e) => { e.stopPropagation(); onArtistClick(); }}>
+                    {currentTrack.artist}
+                  </p>
+                  {isArtistVerified && <HiOutlineCheckBadge size={14} className="flex-shrink-0" style={{ color: '#3B82F6' }} />}
+                </div>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[10px] tabular-nums px-1.5 py-0.5 rounded-md"
                     style={{ background: `${colors.accent}20`, color: colors.accent }}>

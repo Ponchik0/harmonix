@@ -192,8 +192,7 @@ export function BannerEditor({ image, onSave, onCancel }: BannerEditorProps) {
           className="relative rounded-xl overflow-hidden shadow-2xl" 
           style={{ 
             background: '#000',
-            boxShadow: isDragging ? '0 0 40px rgba(139, 92, 246, 0.5)' : '0 20px 60px rgba(0,0,0,0.5)',
-            transition: 'box-shadow 0.2s ease'
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
           }}
         >
           <canvas
@@ -208,32 +207,9 @@ export function BannerEditor({ image, onSave, onCancel }: BannerEditorProps) {
             style={{ 
               cursor: displayMode === 'fill' ? 'default' : isDragging ? 'grabbing' : 'grab',
               transition: isTransitioning ? 'opacity 0.2s ease' : 'none',
-              opacity: isDragging ? 0.95 : 1,
             }}
           />
-          
-          {/* Dragging indicator */}
-          {isDragging && (
-            <div 
-              className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-bold pointer-events-none"
-              style={{ 
-                background: 'rgba(139, 92, 246, 0.9)',
-                color: '#fff',
-                boxShadow: '0 4px 12px rgba(139, 92, 246, 0.5)',
-                animation: 'pulse 1s ease-in-out infinite'
-              }}
-            >
-              Перетаскивание...
-            </div>
-          )}
         </div>
-
-        <style>{`
-          @keyframes pulse {
-            0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
-            50% { opacity: 0.8; transform: translateX(-50%) scale(1.05); }
-          }
-        `}</style>
 
         {/* Display Mode Selector */}
         <div className="space-y-2">

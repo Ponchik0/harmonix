@@ -41,6 +41,30 @@ interface DiscordStatus {
   connected: boolean;
 }
 
+interface UpdateInfo {
+  version: string;
+  releaseDate: string;
+  releaseNotes?: string;
+}
+
+interface UpdateCheckResult {
+  success: boolean;
+  available?: boolean;
+  updateAvailable?: boolean;
+  version?: string;
+  data?: {
+    releaseDate?: string;
+    releaseNotes?: string[];
+    mandatory?: boolean;
+  };
+  error?: string;
+}
+
+interface UpdateDownloadResult {
+  success: boolean;
+  error?: string;
+}
+
 declare global {
   interface ElectronAPI {
     minimize: () => Promise<void>;
@@ -78,6 +102,11 @@ declare global {
     window: {
       setAlwaysOnTop: (enabled: boolean) => Promise<{ success: boolean }>;
       getAlwaysOnTop: () => Promise<{ enabled: boolean }>;
+    };
+    updater?: {
+      check: () => Promise<UpdateCheckResult>;
+      download: () => Promise<UpdateDownloadResult>;
+      install: () => Promise<void>;
     };
     setIcon?: (isLightTheme: boolean) => void;
     deepLink?: {

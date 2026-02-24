@@ -38,7 +38,6 @@ import {
 } from "./SearchSourceSelector";
 import { FaSoundcloud, FaYoutube, FaSpotify } from "react-icons/fa";
 import { SiVk } from "react-icons/si";
-import { SearchActivityIndicator } from "./SearchActivityIndicator";
 import type {
   Track,
   SoundCloudPlaylist,
@@ -187,7 +186,7 @@ export function SearchView() {
     setSelectedArtist(user);
     try {
       const userId = user.id.replace("sc-user-", "");
-      const tracks = await soundCloudService.getUserTracks(userId, 50);
+      const tracks = await soundCloudService.getUserTracks(userId, 50, user.username);
       // Sort tracks by creation date (newest first)
       const sortedTracks = [...tracks].sort((a, b) => {
         const dateA = a.metadata?.releaseDate ? new Date(a.metadata.releaseDate).getTime() : 0;
@@ -338,8 +337,18 @@ export function SearchView() {
       if (artist && tracks) {
         setSelectedArtist(artist);
         setArtistTracks(tracks);
+        setLoadingArtist(false);
       }
     };
+
+    // Check if artist data was stored before navigation (e.g., from PlayerBar)
+    const pendingData = (window as any).__artistData;
+    if (pendingData?.artist && pendingData?.tracks) {
+      setSelectedArtist(pendingData.artist);
+      setArtistTracks(pendingData.tracks);
+      setLoadingArtist(false);
+      delete (window as any).__artistData;
+    }
 
     // Listen for changes
     window.addEventListener("liked-tracks-changed", loadLiked);

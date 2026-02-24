@@ -11,6 +11,7 @@ import {
 import { motion } from "framer-motion";
 import { useNavigationStore } from "../../stores/navigationStore";
 import { useUserStore } from "../../stores/userStore";
+import { useThemeStore } from "../../stores/themeStore";
 import "./Sidebar.css";
 
 type NavId =
@@ -43,6 +44,8 @@ export function Sidebar({ horizontal = false }: SidebarProps) {
   const { currentRoute, navigate, settingsOpen, openSettings } =
     useNavigationStore();
   const { user } = useUserStore();
+  const { currentTheme } = useThemeStore();
+  const colors = currentTheme.colors;
   const isAdmin = user?.isAdmin || false;
 
   const NavButton = ({
@@ -70,7 +73,8 @@ export function Sidebar({ horizontal = false }: SidebarProps) {
         {isActive && (
           <motion.div
             layoutId="active-nav-indicator"
-            className="absolute inset-0 bg-white/10 rounded-xl"
+            className="absolute inset-0 rounded-xl"
+            style={{ background: `${colors.accent}15` }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -81,9 +85,10 @@ export function Sidebar({ horizontal = false }: SidebarProps) {
           type="button"
           onClick={onClick || (() => navigate(item.id as any))}
           title={item.label}
-          className={`sidebar-nav-btn relative z-10 flex items-center justify-center w-11 h-11 rounded-xl transition-colors ${
-            isActive ? "text-white" : "text-white/60 hover:text-white"
-          } ${highlight ? "text-amber-400 hover:text-amber-300" : ""}`}
+          className={`sidebar-nav-btn relative z-10 flex items-center justify-center w-11 h-11 rounded-xl transition-colors`}
+          style={{
+            color: isActive ? colors.accent : `${colors.textPrimary}60`,
+          }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -100,10 +105,10 @@ export function Sidebar({ horizontal = false }: SidebarProps) {
       <nav
         className="sidebar-container-horizontal"
         style={{
-          background: "rgba(0,0,0,0.2)",
+          background: colors.surface,
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          borderBottom: `1px solid ${colors.accent}10`,
         }}
       >
         <div className="sidebar-horizontal-content">
@@ -126,11 +131,12 @@ export function Sidebar({ horizontal = false }: SidebarProps) {
               type="button"
               onClick={() => navigate("profile")}
               title="Профиль"
-              className={`sidebar-avatar-btn relative z-10 w-[36px] h-[36px] rounded-full flex items-center justify-center border-2 bg-white/5 transition-colors overflow-hidden ${
-                currentRoute === "profile"
-                  ? "border-white/50 shadow-[0_0_0_3px_rgba(255,255,255,0.1)]"
-                  : "border-white/10 hover:border-white/30"
-              }`}
+              className={`sidebar-avatar-btn relative z-10 w-[36px] h-[36px] rounded-full flex items-center justify-center border-2 transition-colors overflow-hidden`}
+              style={{
+                background: `${colors.surface}50`,
+                borderColor: currentRoute === "profile" ? `${colors.accent}80` : `${colors.accent}20`,
+                boxShadow: currentRoute === "profile" ? `0 0 0 3px ${colors.accent}20` : "none",
+              }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               data-active={currentRoute === "profile"}
@@ -138,7 +144,7 @@ export function Sidebar({ horizontal = false }: SidebarProps) {
               {user?.avatar ? (
                 <img src={user.avatar} alt="" className="w-full h-full object-cover" />
               ) : (
-                <span className="sidebar-avatar-placeholder text-white/70 font-semibold text-sm">
+                <span className="font-semibold text-sm" style={{ color: `${colors.textPrimary}70` }}>
                   {user?.displayName?.[0]?.toUpperCase() || "?"}
                 </span>
               )}
@@ -172,10 +178,10 @@ export function Sidebar({ horizontal = false }: SidebarProps) {
     <nav
       className="sidebar-container"
       style={{
-        background: "rgba(0,0,0,0.2)",
+        background: colors.surface,
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        borderRight: "1px solid rgba(255,255,255,0.05)",
+        borderRight: `1px solid ${colors.accent}10`,
       }}
     >
       {/* Logo / Home */}
@@ -209,11 +215,12 @@ export function Sidebar({ horizontal = false }: SidebarProps) {
           type="button"
           onClick={() => navigate("profile")}
           title="Профиль"
-          className={`sidebar-avatar-btn relative z-10 w-[42px] h-[42px] rounded-full flex items-center justify-center border-2 bg-white/5 transition-colors overflow-hidden ${
-            currentRoute === "profile"
-              ? "border-white/50 shadow-[0_0_0_3px_rgba(255,255,255,0.1)]"
-              : "border-white/10 hover:border-white/30"
-          }`}
+          className={`sidebar-avatar-btn relative z-10 w-[42px] h-[42px] rounded-full flex items-center justify-center border-2 transition-colors overflow-hidden`}
+          style={{
+            background: `${colors.surface}50`,
+            borderColor: currentRoute === "profile" ? `${colors.accent}80` : `${colors.accent}20`,
+            boxShadow: currentRoute === "profile" ? `0 0 0 3px ${colors.accent}20` : "none",
+          }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           data-active={currentRoute === "profile"}
@@ -221,7 +228,7 @@ export function Sidebar({ horizontal = false }: SidebarProps) {
           {user?.avatar ? (
             <img src={user.avatar} alt="" className="w-full h-full object-cover" />
           ) : (
-            <span className="sidebar-avatar-placeholder text-white/70 font-semibold text-base">
+            <span className="font-semibold text-base" style={{ color: `${colors.textPrimary}70` }}>
               {user?.displayName?.[0]?.toUpperCase() || "?"}
             </span>
           )}

@@ -10,8 +10,8 @@ class YouTubeService {
   readonly serviceId = "youtube";
   readonly serviceName = "YouTube";
 
-  // API ключ захардкожен и скрыт от пользователя
-  private readonly _apiKey = "AIzaSyBqjE9utIqpSsP2G05iyd2QS36mEBuTJlc";
+  // API ключ из переменных окружения
+  private readonly _apiKey = import.meta.env.VITE_YOUTUBE_API_KEY || "";
   private _enabled: boolean = true;
 
   constructor() {

@@ -11,11 +11,10 @@ export function SoundCloudPage() {
   
   // Токены из базы (те же что в SoundCloudService)
   const databaseTokens = [
-    { id: "id1", name: "Токен 1", value: "iZIs9mchVcX5lhVRyQGGAYlNPVldzAoX" },
-    { id: "id2", name: "Токен 2", value: "a3e059563d7fd3372b49b37f00a00bcf" },
+    { id: "id1", name: "Токен 1", value: "EnTrn2ZjaZXfOU7iRsFicZvTOi1Pl3rK" },
   ];
 
-  const [selectedToken, setSelectedToken] = useState<"id1" | "id2" | "custom">("id1");
+  const [selectedToken, setSelectedToken] = useState<"id1" | "custom">("id1");
   const [customToken, setCustomToken] = useState("");
   const [tokenStatus, setTokenStatus] = useState<"idle" | "checking" | "valid" | "invalid">("idle");
   const [showTutorial, setShowTutorial] = useState(false);
@@ -32,9 +31,6 @@ export function SoundCloudPage() {
           // Проверяем какой токен активен
           if (data.token === databaseTokens[0].value) {
             setSelectedToken("id1");
-            setTokenStatus("valid");
-          } else if (data.token === databaseTokens[1].value) {
-            setSelectedToken("id2");
             setTokenStatus("valid");
           } else if (data.customToken && data.token === data.customToken) {
             setSelectedToken("custom");
@@ -70,7 +66,6 @@ export function SoundCloudPage() {
   // Получить текущий токен
   const getCurrentToken = (): string => {
     if (selectedToken === "id1") return databaseTokens[0].value;
-    if (selectedToken === "id2") return databaseTokens[1].value;
     if (selectedToken === "custom") return customToken;
     return "";
   };
@@ -175,7 +170,7 @@ export function SoundCloudPage() {
                   name="token"
                   checked={selectedToken === token.id}
                   onChange={() => {
-                    setSelectedToken(token.id as "id1" | "id2");
+                    setSelectedToken(token.id as "id1");
                     setTokenStatus("idle");
                   }}
                   className="w-4 h-4 accent-[#ff5500]"

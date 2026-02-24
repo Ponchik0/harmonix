@@ -10,6 +10,7 @@ import { useAutoTheme } from "./hooks/useAutoTheme";
 import { useUserStore } from "./stores/userStore";
 import { usePlayerStore } from "./stores/playerStore";
 import { storageService } from "./services/StorageService";
+import { dataSyncService } from "./services/DataSyncService";
 import { soundCloudService } from "./services/SoundCloudService";
 import { youtubeService } from "./services/YouTubeService";
 import { vkMusicService } from "./services/VKMusicService";
@@ -175,6 +176,10 @@ function App({ onReady }: AppProps) {
 
   useEffect(() => {
     const init = async () => {
+      // Initialize persistent storage sync FIRST 
+      // (restores localStorage & IndexedDB from disk before anything reads them)
+      await dataSyncService.init();
+
       await storageService.init();
       // Initialize all music services
       await soundCloudService.init();
@@ -199,6 +204,12 @@ function App({ onReady }: AppProps) {
       }
       // Notify that app is ready (track will be restored after loading screen hides)
       handleReady();
+
+      // Save IndexedDB backup after everything is initialized
+      // (delayed to avoid blocking startup)
+      setTimeout(() => {
+        dataSyncService.saveIndexedDBToDisk();
+      }, 10000);
     };
     init();
   }, [handleReady]);

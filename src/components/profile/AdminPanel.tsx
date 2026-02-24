@@ -17,6 +17,7 @@ import {
   HiOutlineSparkles,
   HiOutlineSquare2Stack,
   HiOutlineBell,
+  HiOutlineArrowDownTray,
 } from "react-icons/hi2";
 import { IoMegaphone } from "react-icons/io5";
 import { useUserStore } from "../../stores/userStore";
@@ -73,8 +74,9 @@ export function AdminPanel() {
   const [maintenanceMessage, setMaintenanceMessage] = useState("Приложение на обслуживании");
 
   const { user } = useUserStore();
-  const { currentTheme } = useThemeStore();
+  const { currentTheme, currentThemeId } = useThemeStore();
   const { colors } = currentTheme;
+  const isLight = !!(currentThemeId?.includes("light") || currentTheme.mode === "light");
 
   useEffect(() => {
     loadData();
@@ -567,6 +569,47 @@ export function AdminPanel() {
             <p className="text-[10px] mt-3 p-2 rounded-lg" style={{ background: `${colors.accent}10`, color: colors.accent }}>
               💡 Место: Dashboard → Settings → Database size
             </p>
+          </div>
+
+          {/* Test Update Notification */}
+          <div className="p-4 rounded-2xl" style={{ background: colors.surface }}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${colors.accent}15` }}>
+                <HiOutlineArrowDownTray className="w-5 h-5" style={{ color: colors.accent }} />
+              </div>
+              <div>
+                <p className="font-medium" style={{ color: colors.textPrimary }}>Тест уведомления</p>
+                <p className="text-xs" style={{ color: colors.textSecondary }}>Показать уведомление об обновлении</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                // Trigger fake update notification
+                const fakeUpdate = {
+                  version: '1.0.2',
+                  releaseDate: new Date().toISOString(),
+                  changelog: [
+                    'Новый дизайн страницы авторизации',
+                    'Редактор баннера профиля',
+                    'Исправлены ошибки',
+                  ],
+                  mandatory: false,
+                };
+                
+                // Temporarily show notification by triggering service
+                localStorage.removeItem('harmonix-dismissed-update');
+                window.dispatchEvent(new CustomEvent('test-update', { detail: fakeUpdate }));
+                
+                window.dispatchEvent(new CustomEvent('show-toast', {
+                  detail: { message: 'Уведомление показано! Смотрите справа внизу', type: 'info' }
+                }));
+              }}
+              className="w-full py-2.5 rounded-xl text-sm font-medium transition-all hover:opacity-90 flex items-center justify-center gap-2"
+              style={{ background: isLight ? `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})` : '#ffffff', color: isLight ? '#ffffff' : '#000000' }}
+            >
+              <HiOutlineArrowDownTray className="w-4 h-4" />
+              Показать уведомление
+            </button>
           </div>
         </div>
       )}

@@ -246,7 +246,7 @@ export const usePlayerSettingsStore = create<PlayerSettings>((set) => ({
   textScale: defaults.textScale ?? 1,
   showTime: defaults.showTime ?? true,
   showVolume: defaults.showVolume ?? true,
-  showQueue: defaults.showQueue ?? true,
+  showQueue: defaults.showQueue ?? false,
   showLyrics: defaults.showLyrics ?? true,
   artworkBlur: defaults.artworkBlur ?? true,
   artworkBlurAmount: defaults.artworkBlurAmount ?? 20,

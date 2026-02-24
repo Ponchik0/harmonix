@@ -51,14 +51,6 @@ interface ElectronAPI {
     clearActivity: () => Promise<{ success: boolean }>;
     getStatus: () => Promise<{ connected: boolean }>;
   };
-  updater?: {
-    check: () => Promise<{ success: boolean; updateAvailable?: boolean; version?: string; error?: string }>;
-    download: () => Promise<{ success: boolean; error?: string }>;
-    install: () => Promise<{ success: boolean }>;
-    getCurrentVersion: () => Promise<{ version: string }>;
-    onUpdateStatus: (callback: (status: UpdateStatus) => void) => void;
-    removeUpdateStatusListener: () => void;
-  };
 }
 
 interface Window {

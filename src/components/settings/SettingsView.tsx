@@ -6,7 +6,6 @@ import {
   HiOutlineCog6Tooth,
   HiOutlineSparkles,
   HiOutlineInformationCircle,
-  HiOutlineSwatch,
   HiOutlineMusicalNote,
   HiOutlineLink,
   HiOutlineAdjustmentsHorizontal,
@@ -1792,8 +1791,6 @@ function SettingRow({
 
 // ========== INTERFACE SETTINGS SECTION ==========
 function InterfaceSettingsSection() {
-  const { currentThemeId, setTheme, getDarkThemes, getLightThemes } =
-    useThemeStore();
   const {
     windowOpacity,
     setWindowOpacity,
@@ -1808,11 +1805,6 @@ function InterfaceSettingsSection() {
     textScale,
     setTextScale,
   } = usePlayerSettingsStore();
-
-  const [activeTab, setActiveTab] = useState<"dark" | "light">(
-    currentThemeId.startsWith("light") ? "light" : "dark"
-  );
-  const themeList = activeTab === "dark" ? getDarkThemes() : getLightThemes();
 
   const iconStyles: {
     id: IconStyle;
@@ -1922,135 +1914,8 @@ function InterfaceSettingsSection() {
     );
   }, [borderRadius]);
 
-  // Theme preview component - Unified style without layout shift
-  const ThemePreview = ({
-    theme,
-    isActive,
-  }: {
-    theme: { id: string; name: string; accent: string; preview: string };
-    isActive: boolean;
-  }) => {
-    return (
-      <button
-        onClick={() => setTheme(theme.id)}
-        className="group relative transition-all duration-200 hover:scale-105"
-      >
-        <div
-          className="relative rounded-2xl p-4 transition-all duration-200"
-          style={{
-            background: "var(--surface-card)",
-            border: `2px solid ${isActive ? theme.accent : "var(--border-base)"}`,
-            boxShadow: isActive 
-              ? `0 4px 16px ${theme.accent}35`
-              : "var(--shadow-sm)"
-          }}
-        >
-          {/* Color squares */}
-          <div className="flex items-center gap-2.5 mb-3">
-            {/* Background color square */}
-            <div
-              className="w-9 h-9 rounded-xl transition-transform duration-200 group-hover:scale-110"
-              style={{
-                background: theme.preview,
-                boxShadow: `0 2px 8px rgba(0,0,0,0.2)`,
-                border: "2px solid var(--border-strong)"
-              }}
-            />
-            {/* Accent color square */}
-            <div
-              className="w-9 h-9 rounded-xl transition-transform duration-200 group-hover:scale-110"
-              style={{
-                background: theme.accent,
-                boxShadow: `0 2px 10px ${theme.accent}60`,
-                border: `2px solid ${theme.accent}40`
-              }}
-            />
-          </div>
-
-          {/* Theme name */}
-          <div className="flex items-center justify-between gap-2">
-            <span
-              className="text-sm font-bold"
-              style={{
-                color: "var(--text-primary)",
-              }}
-            >
-              {theme.name}
-            </span>
-
-            {/* Active checkmark */}
-            {isActive && (
-              <div
-                className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{
-                  background: theme.accent,
-                  boxShadow: `0 2px 8px ${theme.accent}60`
-                }}
-              >
-                <IoCheckmark size={13} style={{ color: "#fff" }} />
-              </div>
-            )}
-          </div>
-        </div>
-      </button>
-    );
-  };
-
   return (
     <div className="space-y-6">
-      {/* Theme Section */}
-      <Section title="Тема оформления" icon={HiOutlineSwatch}>
-        <div className="space-y-4">
-          {/* Theme type tabs */}
-          <div
-            className="flex gap-1 p-1 rounded-xl"
-            style={{ background: "var(--surface-elevated)" }}
-          >
-            <button
-              onClick={() => setActiveTab("dark")}
-              className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
-              style={{
-                background:
-                  activeTab === "dark" ? "var(--surface-card)" : "transparent",
-                color:
-                  activeTab === "dark"
-                    ? "var(--text-primary)"
-                    : "var(--text-subtle)",
-                boxShadow: activeTab === "dark" ? "var(--shadow-sm)" : "none",
-              }}
-            >
-              <span className="text-base">🌙</span> Тёмные
-            </button>
-            <button
-              onClick={() => setActiveTab("light")}
-              className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
-              style={{
-                background:
-                  activeTab === "light" ? "var(--surface-card)" : "transparent",
-                color:
-                  activeTab === "light"
-                    ? "var(--text-primary)"
-                    : "var(--text-subtle)",
-                boxShadow: activeTab === "light" ? "var(--shadow-sm)" : "none",
-              }}
-            >
-              <span className="text-base">☀️</span> Светлые
-            </button>
-          </div>
-          
-          {/* Themes grid - 4 columns to show colors */}
-          <div className="grid grid-cols-4 gap-3">
-            {themeList.map((theme) => (
-              <ThemePreview
-                key={theme.id}
-                theme={theme}
-                isActive={currentThemeId === theme.id}
-              />
-            ))}
-          </div>
-        </div>
-      </Section>
-
       {/* Window Opacity */}
       <Section title="Нативная прозрачность" icon={HiOutlineEye}>
         <div

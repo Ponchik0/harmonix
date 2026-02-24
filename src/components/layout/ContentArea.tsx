@@ -11,6 +11,7 @@ import { AdminPanel } from "../profile/AdminPanel";
 import { usePlayerSettingsStore } from "../../stores/playerSettingsStore";
 import { NowPlayingView } from "../player/NowPlayingView";
 import { FullSettingsPage } from "../settings/FullSettingsPage";
+import { AuroraBackground } from "../background/AuroraBackground";
 
 // Settings Modal Component
 export function SettingsModal() {
@@ -42,21 +43,22 @@ export function SettingsModal() {
         className="absolute inset-0 transition-all duration-500 cursor-pointer"
         onClick={closeSettings}
         style={{
-          backgroundColor: isAnimating ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0)",
-          backdropFilter: isAnimating ? "blur(12px)" : "blur(0px)",
+          backgroundColor: isAnimating ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0)",
+          backdropFilter: isAnimating ? "blur(20px)" : "blur(0px)",
         }}
       />
 
       {/* Modal - centered with smooth animation */}
       <div
-        className="relative rounded-2xl overflow-hidden"
+        className="relative rounded-3xl overflow-hidden glass-fluid liquid-border"
         style={{
           width: "calc(100% - 200px)",
           height: "calc(100% - 100px)",
           maxWidth: "1200px",
-          background: "transparent",
-          border: "1px solid var(--border-base)",
-          boxShadow: isAnimating ? "0 25px 80px rgba(0,0,0,0.4)" : "none",
+          background: "rgba(10, 10, 10, 0.85)",
+          backdropFilter: "blur(40px) saturate(180%)",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
+          boxShadow: isAnimating ? "0 25px 80px rgba(0,0,0,0.5), 0 0 30px var(--glow-color, rgba(255,255,255,0.05))" : "none",
           transform: isAnimating
             ? "scale(1) translateY(0)"
             : "scale(0.95) translateY(20px)",
@@ -85,7 +87,7 @@ function AdminPageWrapper() {
   );
 }
 
-export function ContentArea() {
+export function ContentArea({ playerPadding = 0 }: { playerPadding?: number }) {
   const { currentRoute } = useNavigationStore();
   const { backgroundImageEnabled } = usePlayerSettingsStore();
   const [displayedRoute, setDisplayedRoute] = useState(currentRoute);
@@ -164,26 +166,30 @@ export function ContentArea() {
   const getTransformStyle = () => {
     if (!transitionsEnabled) return 'translateX(0) scale(1)';
     if (isTransitioning) {
-      return slideDirection === 'left' 
-        ? 'translateX(-30px) scale(0.98)' 
-        : 'translateX(30px) scale(0.98)';
+      return 'scale(0.98)';
     }
     return 'translateX(0) scale(1)';
   };
 
   return (
     <main
-      className="flex-1 overflow-hidden relative app-no-drag"
-      style={{ background: backgroundImageEnabled ? "transparent" : "var(--surface-canvas)" }}
+      className="flex-1 overflow-hidden relative app-no-drag transition-[padding] duration-300 ease-fluid"
+      style={{ 
+        background: backgroundImageEnabled ? "transparent" : "var(--surface-canvas)",
+        paddingBottom: `${playerPadding}px`,
+      }}
     >
+      {/* Aurora Background */}
+      <AuroraBackground />
+
       <div
-        className="h-full"
+        className="h-full relative z-10"
         style={{
           opacity: isTransitioning ? 0 : 1,
           transform: getTransformStyle(),
-          filter: isTransitioning ? 'blur(4px)' : 'blur(0px)',
+          filter: isTransitioning ? 'blur(6px)' : 'blur(0px)',
           transition: transitionsEnabled
-            ? "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)"
+            ? "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
             : "none",
         }}
       >

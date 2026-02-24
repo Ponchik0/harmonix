@@ -12,7 +12,7 @@ import {
   IoHeartOutline,
   IoChevronUp,
 } from "react-icons/io5";
-import { HiOutlinePlay, HiOutlinePause } from "react-icons/hi2";
+import { HiOutlinePlay, HiOutlinePause, HiOutlineCheckBadge } from "react-icons/hi2";
 import { PlayerBarProps } from "./types";
 
 export const PlayerBarGlass = memo(function PlayerBarGlass({
@@ -44,6 +44,8 @@ export const PlayerBarGlass = memo(function PlayerBarGlass({
   onVolDragEnd,
   onExpand,
   onTrackClick,
+  onArtistClick,
+  isArtistVerified,
   formatTime,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   playbackSpeed: _playbackSpeed,
@@ -145,7 +147,7 @@ export const PlayerBarGlass = memo(function PlayerBarGlass({
           {currentTrack ? (
             <>
               <div className="relative w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 shadow-lg" style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
-                {artworkUrl && artworkUrl !== "/icon.svg" ? (
+                {artworkUrl ? (
                   <img 
                     src={artworkUrl} 
                     alt="" 
@@ -156,7 +158,7 @@ export const PlayerBarGlass = memo(function PlayerBarGlass({
                   />
                 ) : null}
                 {/* Transparent background when no artwork */}
-                {(!artworkUrl || artworkUrl === "/icon.svg") && (
+                {!artworkUrl && (
                   <div className="absolute inset-0 bg-white/5" />
                 )}
                 {displayPlaying && (
@@ -169,7 +171,10 @@ export const PlayerBarGlass = memo(function PlayerBarGlass({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold truncate" style={{ color: textPrimary }}>{currentTrack.title}</p>
-                <p className="text-xs truncate" style={{ color: textSecondary }}>{currentTrack.artist}</p>
+                <div className="flex items-center gap-1 min-w-0">
+                  <p className="text-xs truncate cursor-pointer hover:underline transition-all" style={{ color: textSecondary }} onClick={(e) => { e.stopPropagation(); onArtistClick(); }}>{currentTrack.artist}</p>
+                  {isArtistVerified && <HiOutlineCheckBadge size={14} className="flex-shrink-0" style={{ color: '#3B82F6' }} />}
+                </div>
               </div>
               <button type="button" onClick={(e) => { e.stopPropagation(); onLikeClick(); }}
                 className="w-8 h-8 flex items-center justify-center flex-shrink-0 rounded-full transition-all hover:scale-110 active:scale-95"

@@ -1,11 +1,7 @@
 import { create } from "zustand";
 
 // Theme IDs matching tokens.css
-export type ThemeId =
-  | "dark" | "dark-slate" | "dark-rose" | "dark-emerald" | "dark-violet"
-  | "dark-amber" | "dark-cyan" | "dark-fuchsia" | "dark-amoled" | "dark-nord"
-  | "light" | "light-sky" | "light-rose" | "light-emerald" | "light-violet"
-  | "light-amber" | "light-cyan" | "light-fuchsia" | "light-stone" | "light-slate";
+export type ThemeId = "dark";
 
 export interface ThemeInfo {
   id: ThemeId;
@@ -15,73 +11,64 @@ export interface ThemeInfo {
   preview: string; // Background color for preview
 }
 
-// All available themes with nice Russian names - matching tokens.css
+// Single theme - dark
 export const themes: ThemeInfo[] = [
-  // Dark themes - vibrant accents with deep backgrounds
-  { id: "dark", name: "Чёрная", mode: "dark", accent: "#ffffff", preview: "#0a0a0a" },
-  { id: "dark-slate", name: "Синий Сланец", mode: "dark", accent: "#60a5fa", preview: "#0f1419" },
-  { id: "dark-rose", name: "Розовая", mode: "dark", accent: "#fb7185", preview: "#1a0f13" },
-  { id: "dark-emerald", name: "Изумрудная", mode: "dark", accent: "#34d399", preview: "#0a1612" },
-  { id: "dark-violet", name: "Фиолетовая", mode: "dark", accent: "#a78bfa", preview: "#110f1a" },
-  { id: "dark-amber", name: "Янтарная", mode: "dark", accent: "#fbbf24", preview: "#1a1510" },
-  { id: "dark-cyan", name: "Бирюзовая", mode: "dark", accent: "#22d3ee", preview: "#0a1619" },
-  { id: "dark-fuchsia", name: "Фуксия", mode: "dark", accent: "#e879f9", preview: "#1a0f19" },
-  { id: "dark-amoled", name: "AMOLED", mode: "dark", accent: "#ffffff", preview: "#000000" },
-  { id: "dark-nord", name: "Нордик", mode: "dark", accent: "#88c0d0", preview: "#2e3440" },
-  // Light themes - softer backgrounds with vibrant accents
-  { id: "light", name: "Белая", mode: "light", accent: "#18181b", preview: "#fafafa" },
-  { id: "light-sky", name: "Небесная", mode: "light", accent: "#0284c7", preview: "#f0f9ff" },
-  { id: "light-rose", name: "Розовая", mode: "light", accent: "#e11d48", preview: "#fff1f2" },
-  { id: "light-emerald", name: "Мятная", mode: "light", accent: "#059669", preview: "#ecfdf5" },
-  { id: "light-violet", name: "Лавандовая", mode: "light", accent: "#7c3aed", preview: "#f5f3ff" },
-  { id: "light-amber", name: "Песочная", mode: "light", accent: "#d97706", preview: "#fffbeb" },
-  { id: "light-cyan", name: "Океаническая", mode: "light", accent: "#0891b2", preview: "#ecfeff" },
-  { id: "light-fuchsia", name: "Сиреневая", mode: "light", accent: "#c026d3", preview: "#fdf4ff" },
-  { id: "light-stone", name: "Каменная", mode: "light", accent: "#44403c", preview: "#fafaf9" },
-  { id: "light-slate", name: "Туманная", mode: "light", accent: "#334155", preview: "#f8fafc" },
+  { id: "dark", name: "Тёмная", mode: "dark", accent: "#ffffff", preview: "#0a0a0a" },
 ];
 
 const STORAGE_KEY = "harmonix-theme";
 
-// Legacy compatibility
+// Legacy compatibility - all old themes map to dark
 const legacyThemeMap: Record<string, ThemeId> = {
   "dark-default": "dark",
-  "dark-midnight": "dark-slate",
-  "dark-ocean": "dark-cyan",
-  "dark-forest": "dark-emerald",
-  "dark-sunset": "dark-amber",
-  "dark-rose": "dark-rose",
-  "dark-nord": "dark-nord",
-  "dark-dracula": "dark-violet",
-  "dark-amoled": "dark-amoled",
-  "dark-cyberpunk": "dark-cyan",
-  "light-default": "light",
-  "light-snow": "light",
-  "light-sky": "light-sky",
-  "light-mint": "light-emerald",
-  "light-peach": "light-amber",
-  "light-lavender": "light-violet",
-  "light-rose": "light-rose",
-  "light-sand": "light-amber",
-  "light-cream": "light-stone",
-  "light-paper": "light-slate",
-  // Old new theme IDs
-  "dark-blue": "dark-slate",
-  "dark-red": "dark-rose",
-  "dark-green": "dark-emerald",
-  "dark-purple": "dark-violet",
-  "dark-orange": "dark-amber",
-  "dark-pink": "dark-fuchsia",
-  "dark-yellow": "dark-amber",
-  "dark-teal": "dark-cyan",
-  "light-blue": "light-sky",
-  "light-red": "light-rose",
-  "light-green": "light-emerald",
-  "light-purple": "light-violet",
-  "light-orange": "light-amber",
-  "light-pink": "light-fuchsia",
-  "light-yellow": "light-amber",
-  "light-teal": "light-cyan",
+  "dark-midnight": "dark",
+  "dark-ocean": "dark",
+  "dark-forest": "dark",
+  "dark-sunset": "dark",
+  "dark-rose": "dark",
+  "dark-nord": "dark",
+  "dark-dracula": "dark",
+  "dark-amoled": "dark",
+  "dark-cyberpunk": "dark",
+  "dark-slate": "dark",
+  "dark-emerald": "dark",
+  "dark-violet": "dark",
+  "dark-amber": "dark",
+  "dark-cyan": "dark",
+  "dark-fuchsia": "dark",
+  "light-default": "dark",
+  "light-snow": "dark",
+  "light-sky": "dark",
+  "light-mint": "dark",
+  "light-peach": "dark",
+  "light-lavender": "dark",
+  "light-rose": "dark",
+  "light-sand": "dark",
+  "light-cream": "dark",
+  "light-paper": "dark",
+  "light-slate": "dark",
+  "light-stone": "dark",
+  "light-emerald": "dark",
+  "light-violet": "dark",
+  "light-amber": "dark",
+  "light-cyan": "dark",
+  "light-fuchsia": "dark",
+  "dark-blue": "dark",
+  "dark-red": "dark",
+  "dark-green": "dark",
+  "dark-purple": "dark",
+  "dark-orange": "dark",
+  "dark-pink": "dark",
+  "dark-yellow": "dark",
+  "dark-teal": "dark",
+  "light-blue": "dark",
+  "light-red": "dark",
+  "light-green": "dark",
+  "light-purple": "dark",
+  "light-orange": "dark",
+  "light-pink": "dark",
+  "light-yellow": "dark",
+  "light-teal": "dark",
 };
 
 
@@ -113,9 +100,6 @@ function loadSavedTheme(): ThemeId {
     }
   } catch {}
   
-  if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: light)").matches) {
-    return "light";
-  }
   return "dark";
 }
 
@@ -186,12 +170,6 @@ interface ThemeStoreState {
 const initialThemeId = loadSavedTheme();
 if (typeof window !== "undefined") {
   applyTheme(initialThemeId);
-  
-  // Set initial taskbar icon based on saved theme
-  const isLightTheme = initialThemeId.startsWith("light");
-  if (window.electronAPI?.setIcon) {
-    window.electronAPI.setIcon(isLightTheme);
-  }
 }
 
 export const useThemeStore = create<ThemeStoreState>((set, get) => ({
@@ -206,12 +184,6 @@ export const useThemeStore = create<ThemeStoreState>((set, get) => ({
     if (!themes.some(t => t.id === newId)) return;
     
     applyTheme(newId);
-    
-    // Change taskbar icon based on theme
-    const isLightTheme = newId.startsWith("light");
-    if (window.electronAPI?.setIcon) {
-      window.electronAPI.setIcon(isLightTheme);
-    }
     
     // Clear dynamic accent when theme changes
     set({
@@ -241,8 +213,8 @@ export const useThemeStore = create<ThemeStoreState>((set, get) => ({
   },
 
   getThemeInfo: () => getThemeInfo(get().currentThemeId),
-  isDark: () => get().currentThemeId.startsWith("dark"),
-  isLight: () => get().currentThemeId.startsWith("light"),
-  getDarkThemes: () => themes.filter(t => t.mode === "dark"),
-  getLightThemes: () => themes.filter(t => t.mode === "light"),
+  isDark: () => true, // Always dark now
+  isLight: () => false, // No light themes
+  getDarkThemes: () => themes,
+  getLightThemes: () => [],
 }));

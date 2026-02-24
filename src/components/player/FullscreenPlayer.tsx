@@ -32,7 +32,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
   const activeLineRef = useRef<HTMLParagraphElement>(null);
   
   // Use custom artwork if enabled, otherwise use track artwork
-  const artworkUrl = (customArtworkEnabled && customArtworkUrl) ? customArtworkUrl : (currentTrack?.artworkUrl || "/icon.svg");
+  const artworkUrl = (customArtworkEnabled && customArtworkUrl) ? customArtworkUrl : (currentTrack?.artworkUrl || "");
   const { navigate } = useNavigationStore();
   
   const [lyrics, setLyrics] = useState<SyncedLine[]>([]);
@@ -227,7 +227,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
         if (artist) {
           // Get artist tracks sorted by date (newest first)
           const userId = artist.id.replace("sc-user-", "");
-          const tracks = await soundCloudService.getUserTracks(userId, 50);
+          const tracks = await soundCloudService.getUserTracks(userId, 50, artist.username);
           
           // Sort tracks by creation date (newest first)
           const sortedTracks = [...tracks].sort((a, b) => {
@@ -246,12 +246,14 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
           onClose();
           navigate("search");
           
-          // Dispatch event to open artist profile
-          setTimeout(() => {
+          // Dispatch event to open artist profile (multiple attempts for reliability)
+          const dispatchArtistEvent = () => {
             window.dispatchEvent(new CustomEvent("open-artist-profile", { 
               detail: { artist, tracks: sortedTracks } 
             }));
-          }, 100);
+          };
+          setTimeout(dispatchArtistEvent, 300);
+          setTimeout(dispatchArtistEvent, 600);
         }
       }
     } catch (error) {
@@ -336,11 +338,11 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
         transition={{ duration: 0.5, delay: 0.3 }}
         whileHover={{ opacity: 1, scale: 1.1 }}
         onClick={onClose}
-        className="absolute top-6 right-6 p-3 rounded-full transition-all z-[110]"
+        className="absolute top-3 right-3 sm:top-6 sm:right-6 p-2 sm:p-3 rounded-full transition-all z-[110]"
         style={{ background: 'var(--surface-elevated)', color: 'var(--text-primary)' }}
         title="Закрыть (Esc)"
       >
-        <IoClose size={28} />
+        <IoClose size={24} />
       </motion.button>
 
       <AnimatePresence mode="wait">
@@ -359,14 +361,14 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
             className="relative z-10 h-full w-full flex items-center justify-center"
           >
             <motion.div 
-              className="w-full max-w-[720px] p-8"
+              className="w-full max-w-[720px] px-4 py-4 sm:p-8 overflow-y-auto max-h-full"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4, delay: 0.2 }}
             >
               {/* Album artwork */}
               <motion.div 
-                className="relative aspect-square w-full mb-8"
+                className="relative w-full max-w-[min(100%,50vh)] mx-auto mb-4 sm:mb-8 aspect-square"
                 initial={{ scale: 0.5, rotateX: 20 }}
                 animate={{ scale: 1, rotateX: 0 }}
                 transition={{ duration: 0.7, ease: [0.34, 1.56, 0.64, 1] }}
@@ -379,7 +381,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.1 }}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/icon.svg";
+                    (e.target as HTMLImageElement).style.display = 'none';
                   }}
                 />
                 {/* Glow effect */}
@@ -396,18 +398,18 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
 
               {/* Track info */}
               <motion.div 
-                className="text-center space-y-2 mb-6"
+                className="text-center space-y-1 sm:space-y-2 mb-3 sm:mb-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <h1 className="text-2xl font-bold tracking-tight line-clamp-2">
+                <h1 className="text-lg sm:text-2xl font-bold tracking-tight line-clamp-2">
                   {currentTrack.title}
                 </h1>
                 <button 
                   onClick={handleArtistClick}
                   disabled={isLoadingArtist}
-                  className="text-lg text-white/50 font-medium hover:text-white/80 hover:underline transition-all cursor-pointer disabled:opacity-50"
+                  className="text-base sm:text-lg text-white/50 font-medium hover:text-white/80 hover:underline transition-all cursor-pointer disabled:opacity-50"
                 >
                   {isLoadingArtist ? "Загрузка..." : currentTrack.artist}
                 </button>
@@ -415,13 +417,13 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
 
               {/* Progress bar */}
               <motion.div 
-                className="space-y-2 mb-6"
+                className="space-y-1 sm:space-y-2 mb-3 sm:mb-6"
                 initial={{ opacity: 0, scaleX: 0.5 }}
                 animate={{ opacity: 1, scaleX: 1 }}
                 transition={{ duration: 0.5, delay: 0.35 }}
               >
                 <div 
-                  className="h-2 w-full bg-white/10 rounded-full cursor-pointer relative overflow-hidden group"
+                  className="h-1.5 sm:h-2 w-full bg-white/10 rounded-full cursor-pointer relative overflow-hidden group"
                   onClick={handleSeek}
                 >
                   <motion.div 
@@ -439,7 +441,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
 
               {/* Controls */}
               <motion.div 
-                className="flex items-center justify-center gap-6 mb-6"
+                className="flex items-center justify-center gap-3 sm:gap-6 mb-3 sm:mb-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
@@ -470,7 +472,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                   whileHover={{ scale: 1.08, boxShadow: "0 0 60px rgba(255,255,255,0.5)" }}
                   whileTap={{ scale: 0.92 }}
                   onClick={() => audioService.toggle()}
-                  className="w-16 h-16 rounded-full flex items-center justify-center"
+                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center"
                   style={{ 
                     background: "#ffffff", 
                     color: "#000000",
@@ -507,7 +509,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
               </motion.div>
 
               {/* Bottom controls */}
-              <div className="flex items-center justify-center gap-6 text-white/30">
+              <div className="flex items-center justify-center gap-4 sm:gap-6 text-white/30">
                 <button 
                   onClick={handleToggleLike} 
                   className="p-2 transition-all"
@@ -520,7 +522,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                 <div className="flex items-center gap-2">
                   <VolumeIcon size={18} className="text-white/40" />
                   <div 
-                    className="w-32 h-2.5 rounded-full cursor-pointer relative overflow-hidden"
+                    className="w-24 sm:w-32 h-2 sm:h-2.5 rounded-full cursor-pointer relative overflow-hidden"
                     style={{ background: "var(--surface-elevated)" }}
                     onMouseDown={handleVolumeMouseDown}
                   >
@@ -574,9 +576,9 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
               initial={{ x: -50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
-              className={`h-full flex flex-col items-center justify-center px-6 ${hasAnyLyrics ? 'w-full lg:w-[35%]' : 'w-full'}`}
+              className={`h-full flex flex-col items-center justify-center px-3 sm:px-6 ${hasAnyLyrics ? 'w-full md:w-[40%] lg:w-[35%]' : 'w-full'}`}
             >
-              <div className={`w-full space-y-5 ${hasAnyLyrics ? 'max-w-[540px]' : 'max-w-[600px]'}`}>
+              <div className={`w-full space-y-3 sm:space-y-5 ${hasAnyLyrics ? 'max-w-[540px]' : 'max-w-[600px]'}`}>
                 {/* Album artwork */}
                 <motion.div className="relative aspect-square w-full">
                   <motion.img
@@ -588,7 +590,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                     alt={currentTrack.title}
                     className="w-full h-full object-cover rounded-3xl shadow-[0_50px_150px_rgba(0,0,0,0.8)] border border-white/10"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/icon.svg";
+                      (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
                 </motion.div>
@@ -599,7 +601,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                     key={currentTrack.title}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-2xl lg:text-3xl font-bold tracking-tight line-clamp-2"
+                    className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight line-clamp-2"
                   >
                     {currentTrack.title}
                   </motion.h1>
@@ -610,7 +612,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                       animate={{ opacity: 1 }}
                       onClick={handleArtistClick}
                       disabled={isLoadingArtist}
-                      className="text-lg text-white/50 font-medium hover:text-white/80 hover:underline transition-all cursor-pointer disabled:opacity-50"
+                      className="text-base sm:text-lg text-white/50 font-medium hover:text-white/80 hover:underline transition-all cursor-pointer disabled:opacity-50"
                     >
                       {isLoadingArtist ? "Загрузка..." : currentTrack.artist}
                     </motion.button>
@@ -654,7 +656,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                 </div>
 
                 {/* Controls */}
-                <div className="flex items-center justify-center gap-6">
+                <div className="flex items-center justify-center gap-3 sm:gap-6">
                   <button 
                     onClick={() => usePlayerStore.getState().toggleShuffle()}
                     className="p-2 rounded-full transition-all"
@@ -675,7 +677,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                   
                   <button 
                     onClick={() => audioService.toggle()}
-                    className="w-18 h-18 p-5 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+                    className="w-14 h-14 sm:w-18 sm:h-18 p-4 sm:p-5 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
                     style={{ 
                       background: "#ffffff", 
                       color: "#000000",
@@ -708,7 +710,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                 </div>
 
                 {/* Bottom controls - Like & Volume */}
-                <div className="flex items-center justify-center gap-6 text-white/40">
+                <div className="flex items-center justify-center gap-4 sm:gap-6 text-white/40">
                   <button 
                     onClick={handleToggleLike} 
                     className="p-2 transition-all"
@@ -747,7 +749,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                 initial={{ x: 50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                className="hidden lg:flex w-[65%] h-full flex-col justify-center px-8 py-12"
+                className="hidden md:flex w-[60%] lg:w-[65%] h-full flex-col justify-center px-4 sm:px-8 py-8 sm:py-12"
               >
                 <div 
                   ref={lyricsContainerRef}
@@ -777,7 +779,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                               duration: 0.4,
                               ease: [0.4, 0, 0.2, 1]
                             }}
-                            className={`text-2xl sm:text-3xl lg:text-4xl xl:text-[2.75rem] 2xl:text-5xl font-extrabold leading-tight cursor-pointer
+                            className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-[2.75rem] 2xl:text-5xl font-extrabold leading-tight cursor-pointer
                               ${isActive ? 'text-white' : 'text-white/40'}
                               hover:text-white hover:opacity-100`}
                             onClick={() => handleLyricClick(line.time)}
@@ -804,7 +806,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                       {plainLyrics.split('\n').slice(0, 30).map((line, index) => (
                         <p 
                           key={index} 
-                          className="text-3xl lg:text-4xl text-white/70 leading-relaxed font-bold"
+                          className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-white/70 leading-relaxed font-bold"
                         >
                           {line || '\u00A0'}
                         </p>
@@ -820,7 +822,7 @@ export function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="hidden lg:flex w-[55%] h-full items-center justify-center"
+                className="hidden md:flex w-[55%] h-full items-center justify-center"
               >
                 <div className="text-center">
                   <IoMusicalNotes size={64} className="text-white/10 mx-auto mb-4" />

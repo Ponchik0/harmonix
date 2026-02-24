@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, globalShortcut, shell, Tray, Menu, nativeImage, dialog } from "electron";
 import path from "path";
+import fs from "fs";
 import http from "http";
 import https from "https";
 import { networkInterfaces } from "os";
@@ -8,20 +9,8 @@ import Store from "electron-store";
 import { exec } from "child_process";
 import { autoUpdater } from "electron-updater";
 
-// Set app name for task manager
-app.setName("Harmonix");
-
 // Add isQuitting flag to app
 let isQuitting = false;
-
-// Register custom protocol for deep links (harmonix://)
-if (process.defaultApp) {
-  if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("harmonix", process.execPath, [path.resolve(process.argv[1])]);
-  }
-} else {
-  app.setAsDefaultProtocolClient("harmonix");
-}
 
 // Discord RPC Module
 import * as discordRpc from "./rpc/discordRpc";
@@ -34,6 +23,15 @@ let pendingDeepLink: string | null = null;
 
 // Electron Store для сохранения настроек
 const store = new Store();
+
+// Persistent data store — shared between dev and production
+// Stored in %APPDATA%/harmonix/harmonix-data.json
+const dataStore = new Store({ name: "harmonix-data" });
+
+// Get user data path for IndexedDB backup
+function getIndexedDBBackupPath(): string {
+  return path.join(app.getPath("userData"), "harmonix-idb-backup.json");
+}
 
 // Settings
 let minimizeToTray = false;
@@ -821,15 +819,72 @@ ipcMain.handle("updater:download", async () => {
   return await downloadUpdate();
 });
 
-ipcMain.handle("updater:install", () => {
+  ipcMain.handle("updater:install", () => {
   installUpdate();
   return { success: true };
 });
 
-ipcMain.handle("updater:getCurrentVersion", () => {
-  return {
-    version: app.getVersion(),
-  };
+// ============================================
+// PERSISTENT STORAGE (shared between dev & production)
+// ============================================
+
+// Save all localStorage data to disk
+ipcMain.handle("persistentStorage:saveLocalStorage", (_event, data: Record<string, string>) => {
+  try {
+    dataStore.set("localStorage", data);
+    console.log("[PersistentStorage] Saved localStorage:", Object.keys(data).length, "keys");
+    return { success: true };
+  } catch (error) {
+    console.error("[PersistentStorage] Error saving localStorage:", error);
+    return { success: false, error: String(error) };
+  }
+});
+
+// Load all localStorage data from disk
+ipcMain.handle("persistentStorage:loadLocalStorage", () => {
+  try {
+    const data = dataStore.get("localStorage", {}) as Record<string, string>;
+    console.log("[PersistentStorage] Loaded localStorage:", Object.keys(data).length, "keys");
+    return { success: true, data };
+  } catch (error) {
+    console.error("[PersistentStorage] Error loading localStorage:", error);
+    return { success: false, data: {}, error: String(error) };
+  }
+});
+
+// Save IndexedDB backup to disk (as JSON file for large data)
+ipcMain.handle("persistentStorage:saveIndexedDB", (_event, data: string) => {
+  try {
+    const backupPath = getIndexedDBBackupPath();
+    fs.writeFileSync(backupPath, data, "utf-8");
+    console.log("[PersistentStorage] Saved IndexedDB backup:", (data.length / 1024).toFixed(1), "KB");
+    return { success: true };
+  } catch (error) {
+    console.error("[PersistentStorage] Error saving IndexedDB:", error);
+    return { success: false, error: String(error) };
+  }
+});
+
+// Load IndexedDB backup from disk
+ipcMain.handle("persistentStorage:loadIndexedDB", () => {
+  try {
+    const backupPath = getIndexedDBBackupPath();
+    if (!fs.existsSync(backupPath)) {
+      console.log("[PersistentStorage] No IndexedDB backup found");
+      return { success: true, data: null };
+    }
+    const data = fs.readFileSync(backupPath, "utf-8");
+    console.log("[PersistentStorage] Loaded IndexedDB backup:", (data.length / 1024).toFixed(1), "KB");
+    return { success: true, data };
+  } catch (error) {
+    console.error("[PersistentStorage] Error loading IndexedDB:", error);
+    return { success: false, data: null, error: String(error) };
+  }
+});
+
+// Get the data directory path
+ipcMain.handle("persistentStorage:getDataPath", () => {
+  return { path: app.getPath("userData") };
 });
 
 // ============================================
@@ -841,20 +896,6 @@ const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
   app.quit();
-} else {
-  app.on("second-instance", (_event, commandLine) => {
-    // Someone tried to run a second instance, focus our window
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.focus();
-    }
-    
-    // Handle deep link from command line (Windows)
-    const deepLink = commandLine.find(arg => arg.startsWith("harmonix://"));
-    if (deepLink) {
-      handleDeepLink(deepLink);
-    }
-  });
 }
 
 function handleDeepLink(url: string) {
@@ -914,6 +955,15 @@ app.on("open-url", (_event, url) => {
 });
 
 app.whenReady().then(async () => {
+  // Register custom protocol for deep links (harmonix://)
+  if (process.defaultApp) {
+    if (process.argv.length >= 2) {
+      app.setAsDefaultProtocolClient("harmonix", process.execPath, [path.resolve(process.argv[1])]);
+    }
+  } else {
+    app.setAsDefaultProtocolClient("harmonix");
+  }
+
   createWindow();
   await discordRpc.initialize();
 
@@ -944,6 +994,11 @@ app.whenReady().then(async () => {
       }
     }, 2000); // Wait for renderer to be ready
   }
+});
+
+// Handle deep link on macOS
+app.on("open-url", (_event, url) => {
+  handleDeepLink(url);
 });
 
 app.on("window-all-closed", async () => {

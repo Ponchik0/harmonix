@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, memo } from "react";
-import { HiOutlineChevronUp } from "react-icons/hi2";
+import { HiOutlineChevronUp, HiOutlineChevronDown } from "react-icons/hi2";
 import { usePlayerStore } from "../../stores/playerStore";
 import { useUserStore } from "../../stores/userStore";
 import { useNavigationStore } from "../../stores/navigationStore";
@@ -8,6 +8,7 @@ import { usePlayerSettingsStore } from "../../stores/playerSettingsStore";
 import { audioService } from "../../services/AudioService";
 import { likedTracksService } from "../../services/LikedTracksService";
 import { shareService } from "../../services/ShareService";
+import { soundCloudService } from "../../services/SoundCloudService";
 import {
   PlayerBarClassic,
   PlayerBarMinimal,
@@ -25,6 +26,8 @@ export const PlayerBar = memo(function PlayerBar() {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showEqualizerMenu, setShowEqualizerMenu] = useState(false);
+  const [isLoadingArtist, setIsLoadingArtist] = useState(false);
+  const [isArtistVerified, setIsArtistVerified] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -43,7 +46,7 @@ export const PlayerBar = memo(function PlayerBar() {
   const colors = currentTheme.colors;
 
   // Use custom artwork if enabled, otherwise use track artwork
-  const artworkUrl = (customArtworkEnabled && customArtworkUrl) ? customArtworkUrl : (currentTrack?.artworkUrl || "/icon.svg");
+  const artworkUrl = (customArtworkEnabled && customArtworkUrl) ? customArtworkUrl : (currentTrack?.artworkUrl || "");
 
   const currentTime = progress * (duration || 0);
 
@@ -71,6 +74,34 @@ export const PlayerBar = memo(function PlayerBar() {
     }
     setIsLiked(likedTracksService.isLiked(currentTrack.id));
   }, [currentTrack]);
+
+  // Check if current artist is verified on SoundCloud
+  useEffect(() => {
+    if (!currentTrack?.artist) {
+      setIsArtistVerified(false);
+      return;
+    }
+    let cancelled = false;
+    const checkVerified = async () => {
+      try {
+        const results = await soundCloudService.search(currentTrack.artist, 5);
+        if (cancelled) return;
+        if (results.users && results.users.length > 0) {
+          const artistName = currentTrack.artist.toLowerCase();
+          const match = results.users.find(u => u.username.toLowerCase() === artistName) 
+                     || results.users.find(u => u.username.toLowerCase().includes(artistName) || artistName.includes(u.username.toLowerCase()))
+                     || results.users[0];
+          setIsArtistVerified(match?.verified || false);
+        } else {
+          setIsArtistVerified(false);
+        }
+      } catch {
+        if (!cancelled) setIsArtistVerified(false);
+      }
+    };
+    checkVerified();
+    return () => { cancelled = true; };
+  }, [currentTrack?.artist]);
 
   const handleLikeClick = () => {
     if (!currentTrack) return;
@@ -125,6 +156,47 @@ export const PlayerBar = memo(function PlayerBar() {
   const handleVolDragEnd = () => setIsDraggingVolume(false);
   const handleExpand = () => navigate("player");
   const handleTrackClick = () => { if (currentTrack) navigate("player"); };
+  const handleArtistClick = useCallback(async () => {
+    if (!currentTrack?.artist || isLoadingArtist) return;
+    
+    setIsLoadingArtist(true);
+    try {
+      const results = await soundCloudService.search(currentTrack.artist, 10);
+      
+      if (results.users && results.users.length > 0) {
+        const artistName = currentTrack.artist.toLowerCase();
+        const exactMatch = results.users.find(u => u.username.toLowerCase() === artistName);
+        const closeMatch = results.users.find(u => 
+          u.username.toLowerCase().includes(artistName) || 
+          artistName.includes(u.username.toLowerCase())
+        );
+        const artist = exactMatch || closeMatch || results.users[0];
+        
+        if (artist) {
+          const userId = artist.id.replace("sc-user-", "");
+          const tracks = await soundCloudService.getUserTracks(userId, 50, artist.username);
+          const sortedTracks = [...tracks].sort((a, b) => {
+            const dateA = a.metadata?.releaseDate ? new Date(a.metadata.releaseDate).getTime() : 0;
+            const dateB = b.metadata?.releaseDate ? new Date(b.metadata.releaseDate).getTime() : 0;
+            return dateB - dateA;
+          });
+          
+          (window as any).__artistData = { artist, tracks: sortedTracks };
+          navigate("search");
+          const dispatchArtistEvent = () => {
+            window.dispatchEvent(new CustomEvent("open-artist-profile", { 
+              detail: { artist, tracks: sortedTracks } 
+            }));
+          };
+          setTimeout(dispatchArtistEvent, 300);
+          setTimeout(dispatchArtistEvent, 600);
+        }
+      }
+    } catch (error) {
+      console.error("[PlayerBar] Error searching for artist:", error);
+    }
+    setIsLoadingArtist(false);
+  }, [currentTrack?.artist, isLoadingArtist, navigate]);
   const handleSpeedClick = () => setShowSpeedMenu(!showSpeedMenu);
   const handleEqualizerClick = () => {
     setShowEqualizerMenu(!showEqualizerMenu);
@@ -193,6 +265,9 @@ export const PlayerBar = memo(function PlayerBar() {
     onVolDragEnd: handleVolDragEnd,
     onExpand: handleExpand,
     onTrackClick: handleTrackClick,
+    onArtistClick: handleArtistClick,
+    isArtistVerified,
+    isLoadingArtist,
     onSpeedClick: handleSpeedClick,
     onEqualizerClick: handleEqualizerClick,
     onSpeedChange: handleSpeedChange,
@@ -218,6 +293,17 @@ export const PlayerBar = memo(function PlayerBar() {
     setMiniPlayerHidden(!miniPlayerHidden);
   };
 
+  const toggleButtonStyle: React.CSSProperties = {
+    width: '36px',
+    height: '14px',
+    borderRadius: '6px 6px 0 0',
+    backgroundColor: colors.surface,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
+  };
+
   return (
     <div 
       className="relative"
@@ -225,103 +311,33 @@ export const PlayerBar = memo(function PlayerBar() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Toggle button when player is visible - above player, centered */}
+      {/* Hide tab — appears on hover above visible player */}
       {!miniPlayerHidden && (
         <div
           className="absolute z-50 left-1/2"
-          onMouseEnter={() => setIsHovered(true)}
           style={{
             bottom: '100%',
             transform: 'translateX(-50%)',
-            padding: '8px 24px',
             opacity: isHovered ? 1 : 0,
             pointerEvents: isHovered ? 'auto' : 'none',
-            transition: 'opacity 0.3s ease',
+            transition: 'opacity 0.25s ease',
           }}
         >
-          <div
-            onClick={handleToggleHide}
-            className="cursor-pointer group"
-            style={{ 
-              width: '56px',
-              height: '20px',
-              borderRadius: '10px 10px 0 0',
-              background: `linear-gradient(180deg, ${colors.surface}f0 0%, ${colors.surface} 100%)`,
-              border: `1px solid ${colors.textSecondary}20`,
-              borderBottom: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '3px',
-              boxShadow: `0 -4px 16px rgba(0,0,0,0.2), inset 0 1px 0 ${colors.textSecondary}10`,
-              backdropFilter: 'blur(12px)',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = `0 -6px 20px rgba(0,0,0,0.3), inset 0 1px 0 ${colors.textSecondary}15`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = `0 -4px 16px rgba(0,0,0,0.2), inset 0 1px 0 ${colors.textSecondary}10`;
-            }}
-          >
-            <div className="w-1 h-1 rounded-full" style={{ background: colors.textSecondary, opacity: 0.5 }} />
-            <HiOutlineChevronUp 
-              size={12} 
-              style={{ 
-                color: colors.textSecondary,
-                transform: 'rotate(180deg)',
-                transition: 'transform 0.2s ease',
-              }} 
-            />
-            <div className="w-1 h-1 rounded-full" style={{ background: colors.textSecondary, opacity: 0.5 }} />
-          </div>
+          <button onClick={handleToggleHide} className="cursor-pointer" style={toggleButtonStyle}>
+            <HiOutlineChevronDown size={10} style={{ color: colors.textSecondary }} />
+          </button>
         </div>
       )}
 
-      {/* Toggle button when player is hidden - centered in container at bottom */}
+      {/* Show tab — visible when player is hidden */}
       {miniPlayerHidden && (
         <div
           className="absolute z-50 left-1/2 bottom-0"
-          style={{
-            transform: 'translateX(-50%)',
-          }}
+          style={{ transform: 'translateX(-50%)' }}
         >
-          <div
-            onClick={handleToggleHide}
-            className="cursor-pointer"
-            style={{ 
-              width: '72px',
-              height: '28px',
-              borderRadius: '14px 14px 0 0',
-              background: `linear-gradient(135deg, ${colors.accent}20 0%, ${colors.surface} 100%)`,
-              border: `1px solid ${colors.accent}40`,
-              borderBottom: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '4px',
-              boxShadow: `0 -4px 20px ${colors.accent}30, inset 0 1px 0 rgba(255,255,255,0.1)`,
-              backdropFilter: 'blur(12px)',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = `0 -6px 24px ${colors.accent}50, inset 0 1px 0 rgba(255,255,255,0.15)`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = `0 -4px 20px ${colors.accent}30, inset 0 1px 0 rgba(255,255,255,0.1)`;
-            }}
-          >
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: colors.accent, boxShadow: `0 0 6px ${colors.accent}` }} />
-            <HiOutlineChevronUp 
-              size={16} 
-              style={{ color: colors.accent }} 
-            />
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: colors.accent, boxShadow: `0 0 6px ${colors.accent}` }} />
-          </div>
+          <button onClick={handleToggleHide} className="cursor-pointer" style={toggleButtonStyle}>
+            <HiOutlineChevronUp size={10} style={{ color: colors.textSecondary }} />
+          </button>
         </div>
       )}
 

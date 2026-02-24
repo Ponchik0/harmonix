@@ -11,7 +11,7 @@
  */
 
 // Конфигурация бота
-const BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE'; // Получить у @BotFather
+const BOT_TOKEN = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE'; // Получить у @BotFather
 const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 // Типы данных для синхронизации

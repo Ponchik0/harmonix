@@ -12,6 +12,10 @@ import {
   HiOutlinePhoto,
   HiOutlineChevronDown,
   HiOutlineArrowsRightLeft,
+  HiOutlineArrowPath,
+  HiOutlineEllipsisVertical,
+  HiOutlineArrowDownTray,
+  HiOutlineDocumentDuplicate,
 } from "react-icons/hi2";
 import { FaSpotify, FaYoutube, FaSoundcloud } from "react-icons/fa";
 import { SiVk } from "react-icons/si";
@@ -19,6 +23,7 @@ import { playlistService } from "../../services/PlaylistService";
 import { audioService } from "../../services/AudioService";
 import { soundCloudService } from "../../services/SoundCloudService";
 import { youtubeService } from "../../services/YouTubeService";
+import { playlistRefreshService } from "../../services/PlaylistRefreshService";
 import { useQueueStore } from "../../stores/queueStore";
 import { usePlayerStore } from "../../stores/playerStore";
 import { useThemeStore } from "../../stores/themeStore";
@@ -35,21 +40,19 @@ export function PlaylistsView() {
   const [newPlaylistDesc, setNewPlaylistDesc] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("recent");
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addToQueue, clearQueue } = useQueueStore();
   // Use selectors to prevent re-renders from progress updates
   const currentTrack = usePlayerStore((state) => state.currentTrack);
   const isPlaying = usePlayerStore((state) => state.isPlaying);
-  const { currentTheme, currentThemeId, isLight } = useThemeStore();
+  const { currentTheme, isLight } = useThemeStore();
   const colors = currentTheme.colors;
   
   // Scrollbar class based on theme
   const scrollbarClass = isLight() ? 'scrollbar-light' : 'scrollbar-visible';
-  
-  // Check theme for button styling
-  const isDarkOutline = ['dark', 'dark-amoled'].includes(currentThemeId);
-  const isLightOutline = ['light', 'light-stone', 'light-slate'].includes(currentThemeId);
-  const isAmoled = currentThemeId === 'dark-amoled';
+  const isAmoled = false;
 
   // Check if URL is a valid image URL (starts with http(s) and has a domain)
   const isValidImageUrl = (url: string | undefined): boolean => {
@@ -297,6 +300,58 @@ export function PlaylistsView() {
     };
     reader.readAsDataURL(file);
     e.target.value = '';
+  };
+
+  const handleRefreshPlaylist = async () => {
+    if (!selectedPlaylist || isRefreshing) return;
+    
+    setIsRefreshing(true);
+    
+    try {
+      const result = await playlistRefreshService.refreshPlaylist(selectedPlaylist);
+      
+      if (result.success) {
+        loadPlaylists();
+        
+        if (result.addedCount > 0) {
+          window.dispatchEvent(
+            new CustomEvent("show-toast", {
+              detail: { 
+                message: `Добавлено ${result.addedCount} новых треков в "${selectedPlaylist.name}"`, 
+                type: "success" 
+              },
+            })
+          );
+        } else {
+          window.dispatchEvent(
+            new CustomEvent("show-toast", {
+              detail: { 
+                message: `Плейлист "${selectedPlaylist.name}" актуален, новых треков нет`, 
+                type: "info" 
+              },
+            })
+          );
+        }
+      } else {
+        window.dispatchEvent(
+          new CustomEvent("show-toast", {
+            detail: { 
+              message: result.error || "Ошибка при обновлении плейлиста", 
+              type: "error" 
+            },
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Refresh error:", error);
+      window.dispatchEvent(
+        new CustomEvent("show-toast", {
+          detail: { message: "Ошибка при обновлении плейлиста", type: "error" },
+        })
+      );
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const formatDuration = (s: number) => `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, "0")}`;
@@ -552,6 +607,123 @@ export function PlaylistsView() {
               >
                 <HiOutlineArrowsRightLeft className="text-xl" />
               </button>
+              
+              {/* Refresh button */}
+              <button
+                onClick={handleRefreshPlaylist}
+                disabled={isRefreshing}
+                className="w-12 h-12 rounded-full flex items-center justify-center transition-all disabled:opacity-50 hover:scale-105"
+                style={{ background: `${colors.accent}20`, color: colors.accent }}
+                title="Обновить плейлист"
+              >
+                <HiOutlineArrowPath className={`text-xl ${isRefreshing ? 'animate-spin' : ''}`} />
+              </button>
+              
+              {/* Options menu (three dots) */}
+              <div className="relative ml-auto">
+                <button
+                  onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+                  className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105"
+                  style={{ background: `${colors.textSecondary}15`, color: colors.textPrimary }}
+                  title="Опции"
+                >
+                  <HiOutlineEllipsisVertical className="text-xl" />
+                </button>
+                
+                {showOptionsMenu && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setShowOptionsMenu(false)}
+                    />
+                    <div
+                      className="absolute right-0 top-full mt-2 py-2 rounded-xl shadow-xl z-50 min-w-[220px]"
+                      style={{ background: colors.surface, border: `1px solid ${colors.textSecondary}20` }}
+                    >
+                      <button
+                        onClick={() => {
+                          handleShufflePlay();
+                          setShowOptionsMenu(false);
+                        }}
+                        disabled={!selectedPlaylist.tracks?.length}
+                        className="w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-white/5 flex items-center gap-3 disabled:opacity-50"
+                        style={{ color: colors.textPrimary }}
+                      >
+                        <HiOutlineArrowsRightLeft className="w-4 h-4" />
+                        Перемешать и играть
+                      </button>
+                      
+                      <button
+                        onClick={() => {
+                          // TODO: Add rename functionality
+                          setShowOptionsMenu(false);
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-white/5 flex items-center gap-3"
+                        style={{ color: colors.textPrimary }}
+                      >
+                        <HiOutlinePencil className="w-4 h-4" />
+                        Переименовать
+                      </button>
+                      
+                      <button
+                        onClick={() => {
+                          handleChangeCover();
+                          setShowOptionsMenu(false);
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-white/5 flex items-center gap-3"
+                        style={{ color: colors.textPrimary }}
+                      >
+                        <HiOutlinePhoto className="w-4 h-4" />
+                        Установить баннер
+                        <span className="ml-auto text-xs" style={{ color: colors.textSecondary }}>1200×300</span>
+                      </button>
+                      
+                      <div className="my-1 border-t" style={{ borderColor: `${colors.textSecondary}10` }} />
+                      
+                      <button
+                        onClick={() => {
+                          // TODO: Add remove duplicates functionality
+                          setShowOptionsMenu(false);
+                        }}
+                        disabled={!selectedPlaylist.tracks?.length}
+                        className="w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-white/5 flex items-center gap-3 disabled:opacity-50"
+                        style={{ color: colors.textPrimary }}
+                      >
+                        <HiOutlineDocumentDuplicate className="w-4 h-4" />
+                        Удалить дубликаты
+                      </button>
+                      
+                      <button
+                        onClick={() => {
+                          handleRefreshPlaylist();
+                          setShowOptionsMenu(false);
+                        }}
+                        disabled={isRefreshing}
+                        className="w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-white/5 flex items-center gap-3 disabled:opacity-50"
+                        style={{ color: colors.accent }}
+                      >
+                        <HiOutlineArrowPath className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        Обновить плейлист
+                      </button>
+                      
+                      <div className="my-1 border-t" style={{ borderColor: `${colors.textSecondary}10` }} />
+                      
+                      <button
+                        onClick={() => {
+                          // TODO: Add export functionality
+                          setShowOptionsMenu(false);
+                        }}
+                        disabled={!selectedPlaylist.tracks?.length}
+                        className="w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-white/5 flex items-center gap-3 disabled:opacity-50"
+                        style={{ color: colors.textPrimary }}
+                      >
+                        <HiOutlineArrowDownTray className="w-4 h-4" />
+                        Экспорт в JSON
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
               
               {/* Sort dropdown */}
               <div className="relative ml-auto">

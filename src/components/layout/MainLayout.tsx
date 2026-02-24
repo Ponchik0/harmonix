@@ -1,4 +1,3 @@
-import React from "react";
 import { MemoizedSidebar } from "./Sidebar";
 import { SettingsModal, MemoizedContentArea } from "./ContentArea";
 import { PlayerBar } from "../player/PlayerBar";
@@ -21,16 +20,13 @@ export function MainLayout() {
   const { currentRoute } = useNavigationStore();
   const { 
     sidebarPosition, 
-    miniPlayerStyle, 
+    miniPlayerStyle,
+    miniPlayerHidden,
     isModalOpen, 
     queuePosition, 
     showQueue, 
     setShowQueue,
     backgroundImageEnabled,
-    customBackgroundUrl,
-    customBackgroundFile,
-    backgroundImageOpacity,
-    backgroundImageBlur
   } = usePlayerSettingsStore();
   // Use selector to only subscribe to isFullscreen and setFullscreen
   const isFullscreen = usePlayerStore((state) => state.isFullscreen);
@@ -51,8 +47,6 @@ export function MainLayout() {
   const isQueueLeft = queuePosition === 'left';
   const isQueueRight = queuePosition === 'right';
   const isQueueBottom = queuePosition === 'bottom';
-
-  const backgroundUrl = customBackgroundFile || customBackgroundUrl;
 
   return (
     <div 
@@ -101,7 +95,12 @@ export function MainLayout() {
           {/* Main Content */}
           <div className="flex-1 flex flex-col overflow-hidden min-w-0 relative">
             <div className="relative z-10 flex-1 flex flex-col overflow-hidden">
-              <MemoizedContentArea />
+              <MemoizedContentArea 
+                playerPadding={showPlayerBar && !miniPlayerHidden 
+                  ? (isFloatingPlayer ? 100 : 80) 
+                  : 0
+                }
+              />
             </div>
           </div>
 
@@ -126,7 +125,10 @@ export function MainLayout() {
       
       {/* Floating player - positioned at bottom center with gap */}
       {showPlayerBar && isFloatingPlayer && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 w-[calc(100%-80px)] max-w-5xl">
+        <div 
+          className="absolute left-1/2 -translate-x-1/2 z-20 w-[calc(100%-80px)] max-w-5xl transition-all duration-300 ease-in-out"
+          style={{ bottom: miniPlayerHidden ? '0px' : '16px' }}
+        >
           <PlayerBar />
         </div>
       )}

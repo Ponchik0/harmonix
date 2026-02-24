@@ -1,0 +1,440 @@
+/* ========================================
+   HARMONIX - FLUID ANIMATIONS SYSTEM
+   Modern, Organic Animation Styles
+   ======================================== */
+
+/* Morphing Animation - Fluid Shape Changes */
+@keyframes morphing {
+  0%, 100% { 
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  }
+  25% { 
+    border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%;
+  }
+  50% { 
+    border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%;
+  }
+  75% { 
+    border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%;
+  }
+}
+
+.animate-morphing {
+  animation: morphing 8s var(--easing-fluid) infinite;
+}
+
+/* Liquid Flow Animation - Organic Movement */
+@keyframes liquidFlow {
+  0% { 
+    transform: translate(0, 0) scale(1);
+  }
+  33% { 
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% { 
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% { 
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.animate-liquid-flow {
+  animation: liquidFlow 15s var(--easing-fluid) infinite;
+}
+
+/* Shimmer Animation - Glossy Effect */
+@keyframes shimmer {
+  0% { 
+    background-position: -200% center;
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% { 
+    background-position: 200% center;
+    opacity: 0.5;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s var(--easing-smooth) infinite;
+}
+
+/* Floating Animation - Gentle Up/Down Movement */
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-floating {
+  animation: floating 3s var(--easing-smooth) infinite;
+}
+
+/* Pulsing Animation - Scale and Opacity */
+@keyframes pulsing {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulsing {
+  animation: pulsing 2s var(--easing-smooth) infinite;
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--duration-normal) var(--easing-smooth);
+}
+
+/* Slide Up Animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp var(--duration-slow) var(--easing-smooth);
+}
+
+/* Slide Down Animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown var(--duration-slow) var(--easing-smooth);
+}
+
+/* Scale In Animation */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--duration-normal) var(--easing-smooth);
+}
+
+/* Scale Out Animation */
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.animate-scale-out {
+  animation: scaleOut var(--duration-fast) var(--easing-smooth);
+}
+
+/* Modal Open Animation */
+@keyframes modalOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-modal-open {
+  animation: modalOpen var(--duration-normal) var(--easing-smooth);
+}
+
+/* Modal Close Animation */
+@keyframes modalClose {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.animate-modal-close {
+  animation: modalClose 250ms var(--easing-smooth);
+}
+
+/* Backdrop Fade In */
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-backdrop-fade-in {
+  animation: backdropFadeIn var(--duration-normal) var(--easing-smooth);
+}
+
+/* Backdrop Fade Out */
+@keyframes backdropFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-backdrop-fade-out {
+  animation: backdropFadeOut var(--duration-fast) var(--easing-smooth);
+}
+
+/* Spin Animation */
+@keyframes spin {
+  from { 
+    transform: rotate(0deg); 
+  }
+  to { 
+    transform: rotate(360deg); 
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Bounce Animation */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1s var(--easing-bounce) infinite;
+}
+
+/* Glow Pulse Animation */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: var(--glow-medium);
+  }
+  50% {
+    box-shadow: var(--glow-strong);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 2s var(--easing-smooth) infinite;
+}
+
+/* Aurora Blob Animation - Slow Organic Movement */
+@keyframes auroraBlob {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translate(50px, -50px) scale(1.1) rotate(90deg);
+  }
+  50% {
+    transform: translate(100px, 0) scale(0.9) rotate(180deg);
+  }
+  75% {
+    transform: translate(50px, 50px) scale(1.05) rotate(270deg);
+  }
+}
+
+.animate-aurora-blob {
+  animation: auroraBlob var(--aurora-duration) var(--easing-fluid) infinite;
+}
+
+/* Staggered Animation Delays */
+.animate-stagger-1 {
+  animation-delay: 50ms;
+}
+
+.animate-stagger-2 {
+  animation-delay: 100ms;
+}
+
+.animate-stagger-3 {
+  animation-delay: 150ms;
+}
+
+.animate-stagger-4 {
+  animation-delay: 200ms;
+}
+
+.animate-stagger-5 {
+  animation-delay: 250ms;
+}
+
+.animate-stagger-6 {
+  animation-delay: 300ms;
+}
+
+/* Lift Effect - For Cards on Hover */
+.animate-lift {
+  transition: transform var(--duration-normal) var(--easing-smooth),
+              box-shadow var(--duration-normal) var(--easing-smooth);
+}
+
+.animate-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glow-medium);
+}
+
+/* Scale on Click */
+.animate-click-scale {
+  transition: transform var(--duration-instant) var(--easing-smooth);
+}
+
+.animate-click-scale:active {
+  transform: scale(0.95);
+}
+
+/* Focus Glow Animation */
+@keyframes focusGlow {
+  0%, 100% {
+    outline-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    outline-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
+  }
+}
+
+.animate-focus-glow:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+  animation: focusGlow 2s var(--easing-smooth) infinite;
+}
+
+/* Appearance Animation - Fade + Slide */
+.animate-appear {
+  animation: 
+    fadeIn var(--duration-slow) var(--easing-smooth),
+    slideUp var(--duration-slow) var(--easing-smooth);
+}
+
+/* Page Transition */
+@keyframes pageTransition {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-page-transition {
+  animation: pageTransition 250ms var(--easing-smooth);
+}
+
+/* Hover Transitions */
+.transition-hover {
+  transition: all 200ms var(--easing-smooth);
+}
+
+.transition-hover-fast {
+  transition: all 150ms var(--easing-smooth);
+}
+
+.transition-hover-slow {
+  transition: all 250ms var(--easing-smooth);
+}
+
+/* Smooth Transitions for Common Properties */
+.transition-colors {
+  transition: background-color var(--duration-fast) var(--easing-smooth),
+              border-color var(--duration-fast) var(--easing-smooth),
+              color var(--duration-fast) var(--easing-smooth);
+}
+
+.transition-transform {
+  transition: transform var(--duration-normal) var(--easing-smooth);
+}
+
+.transition-opacity {
+  transition: opacity var(--duration-normal) var(--easing-smooth);
+}
+
+.transition-all {
+  transition: all var(--duration-normal) var(--easing-smooth);
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .animate-morphing,
+  .animate-liquid-flow,
+  .animate-shimmer,
+  .animate-floating,
+  .animate-pulsing,
+  .animate-glow-pulse,
+  .animate-aurora-blob,
+  .animate-bounce {
+    animation: none !important;
+  }
+}

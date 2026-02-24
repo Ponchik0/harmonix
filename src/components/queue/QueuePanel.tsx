@@ -19,6 +19,8 @@ import { audioService } from "../../services/AudioService";
 import { playlistService } from "../../services/PlaylistService";
 import { offlineTracksService } from "../../services/OfflineTracksService";
 import { artworkService } from "../../services/ArtworkService";
+import { soundCloudService } from "../../services/SoundCloudService";
+import { useNavigationStore } from "../../stores/navigationStore";
 import { clsx } from "clsx";
 import type { Track, Playlist } from "../../types";
 import { usePlayerSettingsStore } from "../../stores/playerSettingsStore";
@@ -81,9 +83,43 @@ export function QueuePanel({ onClose }: QueuePanelProps) {
   const currentTrack = usePlayerStore((state) => state.currentTrack);
   const playTrackFromQueue = usePlayerStore((state) => state.playTrackFromQueue);
   const { queuePosition } = usePlayerSettingsStore();
+  const { navigate } = useNavigationStore();
   const [showPlaylistMenu, setShowPlaylistMenu] = useState<{ track: Track; index: number } | null>(null);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
+
+  const handleArtistClick = async (artistName: string) => {
+    if (!artistName) return;
+    try {
+      const results = await soundCloudService.search(artistName, 10);
+      if (results.users && results.users.length > 0) {
+        const name = artistName.toLowerCase();
+        const artist = results.users.find(u => u.username.toLowerCase() === name)
+          || results.users.find(u => u.username.toLowerCase().includes(name) || name.includes(u.username.toLowerCase()))
+          || results.users[0];
+        if (artist) {
+          const userId = artist.id.replace("sc-user-", "");
+          const tracks = await soundCloudService.getUserTracks(userId, 50, artist.username);
+          const sortedTracks = [...tracks].sort((a, b) => {
+            const dateA = a.metadata?.releaseDate ? new Date(a.metadata.releaseDate).getTime() : 0;
+            const dateB = b.metadata?.releaseDate ? new Date(b.metadata.releaseDate).getTime() : 0;
+            return dateB - dateA;
+          });
+          (window as any).__artistData = { artist, tracks: sortedTracks };
+          navigate("search");
+          const dispatchArtistEvent = () => {
+            window.dispatchEvent(new CustomEvent("open-artist-profile", {
+              detail: { artist, tracks: sortedTracks }
+            }));
+          };
+          setTimeout(dispatchArtistEvent, 300);
+          setTimeout(dispatchArtistEvent, 600);
+        }
+      }
+    } catch (error) {
+      console.error("[QueuePanel] Error navigating to artist:", error);
+    }
+  };
 
   const getArtworkUrl = (track: Track) => {
     // Return existing artwork or cached only - no automatic search
@@ -282,7 +318,7 @@ export function QueuePanel({ onClose }: QueuePanelProps) {
                 <p className="text-sm font-semibold truncate text-white">
                   {currentTrack.title}
                 </p>
-                <p className="text-xs text-gray-400 truncate">
+                <p className="text-xs text-gray-400 truncate cursor-pointer hover:underline transition-all" onClick={(e) => { e.stopPropagation(); handleArtistClick(currentTrack.artist); }}>
                   {currentTrack.artist}
                 </p>
               </div>
@@ -333,7 +369,7 @@ export function QueuePanel({ onClose }: QueuePanelProps) {
                         <p className="text-xs font-medium truncate text-white w-full text-center">
                           {track.title}
                         </p>
-                        <p className="text-[10px] text-gray-500 truncate w-full text-center">
+                        <p className="text-[10px] text-gray-500 truncate w-full text-center cursor-pointer hover:underline transition-all" onClick={(e) => { e.stopPropagation(); handleArtistClick(track.artist); }}>
                           {track.artist}
                         </p>
                         <button
@@ -442,7 +478,7 @@ export function QueuePanel({ onClose }: QueuePanelProps) {
                   <p className="text-[15px] font-semibold truncate text-white">
                     {currentTrack.title}
                   </p>
-                  <p className="text-sm text-gray-400 truncate">
+                  <p className="text-sm text-gray-400 truncate cursor-pointer hover:underline transition-all" onClick={(e) => { e.stopPropagation(); handleArtistClick(currentTrack.artist); }}>
                     {currentTrack.artist}
                   </p>
                 </div>
@@ -502,7 +538,7 @@ export function QueuePanel({ onClose }: QueuePanelProps) {
                       <p className="text-sm font-medium truncate text-white">
                         {track.title}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-xs text-gray-500 truncate cursor-pointer hover:underline transition-all" onClick={(e) => { e.stopPropagation(); handleArtistClick(track.artist); }}>
                         {track.artist}
                       </p>
                     </div>
@@ -568,7 +604,7 @@ export function QueuePanel({ onClose }: QueuePanelProps) {
                       <p className="text-sm truncate text-gray-300">
                         {track.title}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-xs text-gray-500 truncate cursor-pointer hover:underline transition-all" onClick={(e) => { e.stopPropagation(); handleArtistClick(track.artist); }}>
                         {track.artist}
                       </p>
                     </div>

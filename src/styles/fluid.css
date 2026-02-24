@@ -1,0 +1,469 @@
+/* ========================================
+   HARMONIX - FLUID DESIGN SYSTEM
+   Organic, Flowing Design Elements
+   ======================================== */
+
+/* Fluid Border Radius Utilities */
+.fluid-radius-sm {
+  border-radius: var(--fluid-radius-sm);
+}
+
+.fluid-radius-md {
+  border-radius: var(--fluid-radius-md);
+}
+
+.fluid-radius-lg {
+  border-radius: var(--fluid-radius-lg);
+}
+
+.fluid-radius-xl {
+  border-radius: var(--fluid-radius-xl);
+}
+
+/* Organic Shapes - Morphing Border Radius */
+.fluid-shape-organic {
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+.fluid-shape-blob-1 {
+  border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%;
+}
+
+.fluid-shape-blob-2 {
+  border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%;
+}
+
+.fluid-shape-blob-3 {
+  border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%;
+}
+
+/* Fluid Gradients */
+.fluid-gradient-vertical {
+  background: linear-gradient(
+    180deg,
+    var(--gradient-glass-start) 0%,
+    var(--gradient-glass-mid) 50%,
+    var(--gradient-glass-end) 100%
+  );
+}
+
+.fluid-gradient-horizontal {
+  background: linear-gradient(
+    90deg,
+    var(--gradient-glass-start) 0%,
+    var(--gradient-glass-mid) 50%,
+    var(--gradient-glass-end) 100%
+  );
+}
+
+.fluid-gradient-diagonal {
+  background: linear-gradient(
+    135deg,
+    var(--gradient-glass-start) 0%,
+    var(--gradient-glass-mid) 50%,
+    var(--gradient-glass-end) 100%
+  );
+}
+
+.fluid-gradient-radial {
+  background: radial-gradient(
+    circle at center,
+    var(--gradient-glass-start) 0%,
+    var(--gradient-glass-mid) 50%,
+    var(--gradient-glass-end) 100%
+  );
+}
+
+/* Animated Fluid Gradients */
+.fluid-gradient-animated {
+  background: linear-gradient(
+    -45deg,
+    var(--gradient-glass-start),
+    var(--gradient-glass-mid),
+    var(--gradient-glass-end),
+    var(--gradient-glass-mid)
+  );
+  background-size: 400% 400%;
+  animation: fluidGradient 15s var(--easing-fluid) infinite;
+}
+
+@keyframes fluidGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Fluid Blob Elements */
+.fluid-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(var(--aurora-blob-blur));
+  opacity: var(--aurora-intensity);
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+.fluid-blob-sm {
+  width: var(--aurora-blob-size-sm);
+  height: var(--aurora-blob-size-sm);
+}
+
+.fluid-blob-md {
+  width: var(--aurora-blob-size-md);
+  height: var(--aurora-blob-size-md);
+}
+
+.fluid-blob-lg {
+  width: var(--aurora-blob-size-lg);
+  height: var(--aurora-blob-size-lg);
+}
+
+/* Fluid Container */
+.fluid-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--fluid-radius-md);
+}
+
+/* Fluid Card */
+.fluid-card {
+  border-radius: var(--fluid-radius-md);
+  transition: 
+    transform var(--duration-normal) var(--easing-fluid),
+    box-shadow var(--duration-normal) var(--easing-fluid),
+    border-radius var(--duration-slow) var(--easing-fluid);
+}
+
+.fluid-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-radius: var(--fluid-radius-lg);
+}
+
+/* Fluid Button */
+.fluid-button {
+  border-radius: var(--fluid-radius-md);
+  transition: 
+    transform var(--duration-fast) var(--easing-fluid),
+    border-radius var(--duration-normal) var(--easing-fluid);
+}
+
+.fluid-button:hover {
+  border-radius: var(--fluid-radius-lg);
+}
+
+.fluid-button:active {
+  transform: scale(0.95);
+  border-radius: var(--fluid-radius-sm);
+}
+
+/* Fluid Panel */
+.fluid-panel {
+  border-radius: var(--fluid-radius-lg);
+  transition: border-radius var(--duration-slow) var(--easing-fluid);
+}
+
+/* Fluid Modal */
+.fluid-modal {
+  border-radius: var(--fluid-radius-xl);
+}
+
+/* Fluid Scale Effects */
+.fluid-scale-hover {
+  transition: transform var(--duration-normal) var(--easing-fluid);
+}
+
+.fluid-scale-hover:hover {
+  transform: scale(1.05);
+}
+
+.fluid-scale-click {
+  transition: transform var(--duration-instant) var(--easing-fluid);
+}
+
+.fluid-scale-click:active {
+  transform: scale(0.95);
+}
+
+/* Fluid Morphing Effects */
+.fluid-morph {
+  transition: border-radius var(--duration-fluid) var(--easing-fluid);
+}
+
+.fluid-morph:hover {
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+/* Fluid Shadows */
+.fluid-shadow-sm {
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+.fluid-shadow-md {
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    0 0 30px rgba(255, 255, 255, 0.08);
+}
+
+.fluid-shadow-lg {
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 0 40px rgba(255, 255, 255, 0.1);
+}
+
+/* Fluid Glow Effects */
+.fluid-glow {
+  box-shadow: 
+    0 0 20px rgba(255, 255, 255, 0.1),
+    0 0 40px rgba(255, 255, 255, 0.05);
+}
+
+.fluid-glow-hover {
+  transition: box-shadow var(--duration-normal) var(--easing-fluid);
+}
+
+.fluid-glow-hover:hover {
+  box-shadow: 
+    0 0 30px rgba(255, 255, 255, 0.2),
+    0 0 60px rgba(255, 255, 255, 0.1);
+}
+
+/* Fluid Overlay */
+.fluid-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Fluid Text Gradient */
+.fluid-text-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Fluid Border */
+.fluid-border {
+  border: 1px solid rgba(255, 255, 255, var(--glass-border-opacity));
+  transition: border-color var(--duration-normal) var(--easing-fluid);
+}
+
+.fluid-border:hover {
+  border-color: rgba(255, 255, 255, var(--glass-border-hover));
+}
+
+/* Fluid Animated Border */
+.fluid-border-animated {
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.fluid-border-animated::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.3)
+  );
+  background-size: 200% 200%;
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: fluidBorder 3s linear infinite;
+}
+
+@keyframes fluidBorder {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Fluid Ripple Effect */
+.fluid-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.fluid-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s var(--easing-fluid), height 0.6s var(--easing-fluid), opacity 0.6s;
+  opacity: 0;
+}
+
+.fluid-ripple:active::after {
+  width: 300px;
+  height: 300px;
+  opacity: 1;
+  transition: 0s;
+}
+
+/* Fluid Shimmer Effect */
+.fluid-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.fluid-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  animation: shimmerSlide 3s var(--easing-fluid) infinite;
+}
+
+@keyframes shimmerSlide {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 200%;
+  }
+}
+
+/* Fluid Wave Effect */
+@keyframes fluidWave {
+  0% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.fluid-wave {
+  position: relative;
+  overflow: hidden;
+}
+
+.fluid-wave::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 200%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 70%
+  );
+  animation: fluidWave 4s var(--easing-fluid) infinite;
+}
+
+/* Fluid Breathing Effect */
+@keyframes fluidBreathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 0.9;
+  }
+}
+
+.fluid-breathe {
+  animation: fluidBreathe 4s var(--easing-fluid) infinite;
+}
+
+/* Fluid Float Effect */
+@keyframes fluidFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
+  75% {
+    transform: translateY(-15px) rotate(0.5deg);
+  }
+}
+
+.fluid-float {
+  animation: fluidFloat 6s var(--easing-fluid) infinite;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .fluid-gradient-animated,
+  .fluid-border-animated::before,
+  .fluid-shimmer::before,
+  .fluid-wave::before,
+  .fluid-breathe,
+  .fluid-float {
+    animation: none !important;
+  }
+  
+  .fluid-card:hover,
+  .fluid-button:hover,
+  .fluid-scale-hover:hover {
+    transform: none;
+  }
+}
+
+/* Performance Optimizations */
+.fluid-blob,
+.fluid-gradient-animated,
+.fluid-border-animated,
+.fluid-shimmer,
+.fluid-wave {
+  will-change: transform, opacity;
+}

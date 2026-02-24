@@ -157,7 +157,7 @@ class PlaylistService {
     }
   }
 
-  addTrackToPlaylist(playlistId: string, track: Track): boolean {
+  addTrackToPlaylist(playlistId: string, track: Track, prepend: boolean = false): boolean {
     const playlists = this.getPlaylists();
     const playlist = playlists.find((p) => p.id === playlistId);
     if (!playlist) return false;
@@ -176,10 +176,18 @@ class PlaylistService {
     };
 
     playlist.tracks = playlist.tracks || [];
-    playlist.tracks.push(cleanTrack);
+    
+    // Add to beginning or end based on prepend flag
+    if (prepend) {
+      playlist.tracks.unshift(cleanTrack);
+      console.log("[PlaylistService] Prepended track to playlist:", cleanTrack.title);
+    } else {
+      playlist.tracks.push(cleanTrack);
+      console.log("[PlaylistService] Added track to playlist:", cleanTrack.title);
+    }
+    
     playlist.updatedAt = new Date().toISOString();
     this.savePlaylists(playlists);
-    console.log("[PlaylistService] Added track to playlist:", cleanTrack.title);
     return true;
   }
 
@@ -313,6 +321,7 @@ class PlaylistService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         source: source,
+        sourceUrl: jsonData.sourceUrl || jsonData.url || jsonData.permalink_url || undefined, // Save source URL for refreshing
       };
 
       if (existingIndex !== -1) {

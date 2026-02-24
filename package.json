@@ -1,6 +1,6 @@
 {
   "name": "harmonix",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Next-Generation Multi-Platform Music Application",
   "author": "Harmonix Team",
   "main": "dist-electron/main.js",
@@ -33,6 +33,7 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^14.1.2",
     "@types/howler": "^2.2.11",
     "@types/react": "^18.2.45",

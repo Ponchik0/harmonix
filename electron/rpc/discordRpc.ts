@@ -46,7 +46,7 @@ export interface DiscordStatus {
 
 // Register your own Discord Application at https://discord.com/developers/applications
 // and replace this with your Client ID
-const DISCORD_CLIENT_ID = "1459639329197527275";
+const DISCORD_CLIENT_ID = process.env.VITE_DISCORD_CLIENT_ID || "1459639329197527275";
 const UPDATE_THROTTLE = 1000;
 const PROGRESS_THROTTLE_MS = 15000;
 

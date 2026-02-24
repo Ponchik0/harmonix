@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
-import { HiOutlineArrowDownTray, HiOutlineXMark, HiOutlineSparkles, HiArrowPath } from 'react-icons/hi2';
+import { HiOutlineArrowDownTray, HiOutlineXMark, HiArrowPath } from 'react-icons/hi2';
 import { updateService, UpdateInfo, UpdateStatus } from '../../services/UpdateService';
 import { useThemeStore } from '../../stores/themeStore';
 
 export function UpdateNotification() {
   const [update, setUpdate] = useState<UpdateInfo | null>(null);
   const [visible, setVisible] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
-  const { currentTheme } = useThemeStore();
+  const { currentTheme, currentThemeId } = useThemeStore();
   const colors = currentTheme.colors;
+  const isLight = !!(currentThemeId?.includes("light") || currentTheme.mode === "light");
 
   useEffect(() => {
     // Проверяем обновления при загрузке
@@ -41,6 +41,14 @@ export function UpdateNotification() {
       }
     });
 
+    // Listen for test update event from admin panel
+    const handleTestUpdate = (e: any) => {
+      const fakeUpdate = e.detail;
+      setUpdate(fakeUpdate);
+      setVisible(true);
+    };
+    window.addEventListener('test-update', handleTestUpdate);
+
     // Периодическая проверка каждые 30 минут
     const interval = setInterval(() => {
       updateService.checkForUpdates();
@@ -49,6 +57,7 @@ export function UpdateNotification() {
     return () => {
       unsubscribe();
       unsubscribeStatus();
+      window.removeEventListener('test-update', handleTestUpdate);
       clearInterval(interval);
     };
   }, []);
@@ -76,6 +85,9 @@ export function UpdateNotification() {
     await updateService.checkForUpdates(true);
   };
 
+  // Показываем уведомление в dev режиме для тестирования
+  const isDevMode = import.meta.env.DEV;
+
   if (!visible || !update) return null;
 
   const isDownloaded = updateStatus?.status === 'downloaded';
@@ -83,103 +95,109 @@ export function UpdateNotification() {
 
   return (
     <div
-      className="fixed bottom-24 right-4 z-50 max-w-sm animate-in slide-in-from-right duration-300"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{
-        animation: 'slideInRight 0.3s ease-out',
+        background: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(8px)',
+        animation: 'fadeIn 0.3s ease-out',
       }}
     >
       <style>{`
-        @keyframes slideInRight {
-          from { transform: translateX(100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
         @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 20px ${colors.accent}40; }
-          50% { box-shadow: 0 0 30px ${colors.accent}60; }
+          0%, 100% { box-shadow: 0 0 40px ${colors.accent}40; }
+          50% { box-shadow: 0 0 60px ${colors.accent}60; }
         }
       `}</style>
 
       <div
-        className="rounded-2xl overflow-hidden backdrop-blur-xl"
+        className="w-full max-w-md rounded-3xl overflow-hidden"
         style={{
-          background: `linear-gradient(135deg, ${colors.accent}20, ${colors.secondary}20)`,
-          border: `1px solid ${colors.accent}40`,
-          animation: 'pulse-glow 2s ease-in-out infinite',
+          background: colors.background,
+          border: `2px solid ${colors.accent}60`,
+          animation: 'slideUp 0.4s ease-out, pulse-glow 2s ease-in-out infinite',
+          boxShadow: `0 20px 60px rgba(0, 0, 0, 0.5)`,
         }}
       >
         {/* Header */}
         <div
-          className="px-4 py-3 flex items-center gap-3"
-          style={{ borderBottom: `1px solid ${colors.accent}30` }}
+          className="px-6 py-5 flex items-center gap-4"
+          style={{ 
+            background: isLight ? `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})` : `linear-gradient(135deg, ${colors.accent}20, ${colors.secondary}15)`,
+            borderBottom: `1px solid ${colors.accent}30` 
+          }}
         >
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})` }}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+            style={{ background: isLight ? `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})` : '#ffffff' }}
           >
             {isChecking ? (
-              <HiArrowPath size={20} className="text-white animate-spin" />
+              <HiArrowPath size={28} className={isLight ? 'text-white animate-spin' : 'text-black animate-spin'} />
             ) : (
-              <HiOutlineSparkles size={20} className="text-white" />
+              <HiOutlineArrowDownTray size={28} className={isLight ? 'text-white' : 'text-black'} />
             )}
           </div>
           <div className="flex-1">
-            <p className="font-semibold" style={{ color: colors.textPrimary }}>
+            <p className="font-bold text-xl" style={{ color: isLight ? '#ffffff' : colors.textPrimary }}>
               {isChecking ? 'Проверка обновлений...' : 'Доступно обновление!'}
             </p>
-            <p className="text-sm" style={{ color: colors.textSecondary }}>
+            <p className="text-base font-medium" style={{ color: isLight ? 'rgba(255, 255, 255, 0.9)' : colors.accent }}>
               Версия {update.version}
             </p>
           </div>
           <button
             onClick={handleDismiss}
-            className="p-1.5 rounded-lg transition-colors hover:bg-white/10"
-            style={{ color: colors.textSecondary }}
+            className="p-2 rounded-xl transition-all hover:scale-110"
+            style={{ background: isLight ? 'rgba(255, 255, 255, 0.2)' : `${colors.textSecondary}15`, color: isLight ? '#ffffff' : colors.textPrimary }}
           >
-            <HiOutlineXMark size={18} />
+            <HiOutlineXMark size={22} />
           </button>
         </div>
 
-        {/* Changelog (expandable) */}
+        {/* Changelog - Always visible */}
         {update.changelog && update.changelog.length > 0 && (
-          <div className="px-4 py-2">
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="text-sm hover:underline"
-              style={{ color: colors.accent }}
-            >
-              {expanded ? 'Скрыть изменения' : 'Показать изменения'}
-            </button>
-
-            {expanded && (
-              <ul className="mt-2 space-y-1">
-                {update.changelog.map((item, i) => (
-                  <li
-                    key={i}
-                    className="text-sm flex items-start gap-2"
-                    style={{ color: colors.textSecondary }}
-                  >
-                    <span style={{ color: colors.accent }}>•</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            )}
+          <div className="px-6 py-4" style={{ background: colors.surface }}>
+            <p className="text-sm font-bold mb-3" style={{ color: colors.textPrimary }}>
+              Что нового:
+            </p>
+            <ul className="space-y-2">
+              {update.changelog.map((item, i) => (
+                <li
+                  key={i}
+                  className="text-sm flex items-start gap-3"
+                  style={{ color: colors.textSecondary }}
+                >
+                  <span 
+                    className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" 
+                    style={{ background: colors.accent }}
+                  />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
         {/* Download Progress */}
         {isDownloading && (
-          <div className="px-4 py-2">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm" style={{ color: colors.textSecondary }}>
+          <div className="px-6 py-4" style={{ background: colors.background }}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium" style={{ color: colors.textPrimary }}>
                 Загрузка обновления...
               </span>
-              <span className="text-sm font-medium" style={{ color: colors.accent }}>
+              <span className="text-sm font-bold" style={{ color: colors.accent }}>
                 {downloadProgress}%
               </span>
             </div>
             <div
-              className="h-2 rounded-full overflow-hidden"
+              className="h-3 rounded-full overflow-hidden"
               style={{ background: `${colors.accent}20` }}
             >
               <div
@@ -194,27 +212,29 @@ export function UpdateNotification() {
         )}
 
         {/* Actions */}
-        <div className="px-4 py-3 flex gap-2">
+        <div className="px-6 py-5 flex gap-3" style={{ background: colors.background }}>
           {!isDownloaded && !isDownloading && (
             <>
               <button
                 onClick={handleDismiss}
-                className="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
+                className="flex-1 py-3.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
                 style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  color: colors.textSecondary,
+                  background: isLight ? `${colors.textSecondary}15` : `${colors.textSecondary}20`,
+                  color: colors.textPrimary,
                 }}
               >
                 Позже
               </button>
               <button
                 onClick={handleDownload}
-                className="flex-1 py-2 rounded-xl text-sm font-medium text-white flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+                className="flex-1 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
                 style={{
-                  background: `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})`,
+                  background: isLight ? `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})` : '#ffffff',
+                  color: isLight ? '#ffffff' : '#000000',
+                  boxShadow: `0 4px 16px ${colors.accent}40`,
                 }}
               >
-                <HiOutlineArrowDownTray size={16} />
+                <HiOutlineArrowDownTray size={18} />
                 Скачать
               </button>
             </>
@@ -223,12 +243,13 @@ export function UpdateNotification() {
           {isDownloading && (
             <button
               disabled
-              className="w-full py-2 rounded-xl text-sm font-medium text-white flex items-center justify-center gap-2 opacity-70"
+              className="w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 opacity-70"
               style={{
-                background: `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})`,
+                background: isLight ? `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})` : '#ffffff',
+                color: isLight ? '#ffffff' : '#000000',
               }}
             >
-              <HiArrowPath size={16} className="animate-spin" />
+              <HiArrowPath size={18} className="animate-spin" />
               Загрузка...
             </button>
           )}
@@ -236,12 +257,14 @@ export function UpdateNotification() {
           {isDownloaded && (
             <button
               onClick={handleInstall}
-              className="w-full py-2 rounded-xl text-sm font-medium text-white flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+              className="w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
               style={{
-                background: `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})`,
+                background: isLight ? `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})` : '#ffffff',
+                color: isLight ? '#ffffff' : '#000000',
+                boxShadow: `0 4px 16px ${colors.accent}40`,
               }}
             >
-              <HiOutlineArrowDownTray size={16} />
+              <HiOutlineArrowDownTray size={18} />
               Установить и перезапустить
             </button>
           )}
@@ -250,13 +273,29 @@ export function UpdateNotification() {
         {/* Mandatory warning */}
         {update.mandatory && (
           <div
-            className="px-4 py-2 text-xs text-center"
+            className="px-6 py-3 text-sm text-center font-bold flex items-center justify-center gap-2"
             style={{
-              background: 'rgba(239, 68, 68, 0.2)',
+              background: 'rgba(239, 68, 68, 0.15)',
               color: '#EF4444',
+              borderTop: '1px solid rgba(239, 68, 68, 0.3)',
             }}
           >
-            ⚠️ Обязательное обновление
+            <HiOutlineXMark size={18} />
+            Обязательное обновление
+          </div>
+        )}
+
+        {/* Dev mode indicator */}
+        {isDevMode && (
+          <div
+            className="px-6 py-3 text-xs text-center font-medium"
+            style={{
+              background: `${colors.accent}15`,
+              color: colors.accent,
+              borderTop: `1px solid ${colors.accent}30`,
+            }}
+          >
+            🧪 Dev Mode - Тестирование уведомления
           </div>
         )}
       </div>

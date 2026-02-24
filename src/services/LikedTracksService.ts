@@ -2,6 +2,7 @@
 import type { Track } from "../types";
 
 const LIKED_TRACKS_KEY = "harmonix-liked-tracks";
+const LIKED_SOURCE_URL_KEY = "harmonix-liked-source-url";
 
 export interface LikedTrack extends Track {
   likedAt: number;
@@ -57,6 +58,24 @@ class LikedTracksService {
       localStorage.setItem(LIKED_TRACKS_KEY, JSON.stringify(tracks));
     } catch (e) {
       console.error("[LikedTracksService] Error saving:", e);
+    }
+  }
+
+  // Get/Set source URL for liked tracks (for refreshing)
+  getSourceUrl(): string | null {
+    try {
+      return localStorage.getItem(LIKED_SOURCE_URL_KEY);
+    } catch {
+      return null;
+    }
+  }
+
+  setSourceUrl(url: string): void {
+    try {
+      localStorage.setItem(LIKED_SOURCE_URL_KEY, url);
+      console.log("[LikedTracksService] Saved source URL:", url);
+    } catch (e) {
+      console.error("[LikedTracksService] Error saving source URL:", e);
     }
   }
 

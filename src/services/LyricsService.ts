@@ -1,7 +1,7 @@
 // Lyrics Service with Genius + LRCLIB + Musixmatch for synced lyrics
 
-const GENIUS_ACCESS_TOKEN =
-  "hoAYb8K8ThsPXjavu2t_MWq8EyqpR1BHVyyOyPqfDu4imNPCVRnCEPuiPKS1Stg0";
+const GENIUS_ACCESS_TOKEN = import.meta.env.VITE_GENIUS_ACCESS_TOKEN || "";
+const HAPPI_API_KEY = import.meta.env.VITE_HAPPI_API_KEY || "demo";
 
 export interface SyncedLine {
   time: number; // seconds
@@ -167,7 +167,7 @@ class LyricsServiceClass {
           query
         )}&limit=1&type=track`,
         {
-          headers: { "x-happi-key": "demo" },
+          headers: { "x-happi-key": HAPPI_API_KEY },
           signal: AbortSignal.timeout(5000),
         }
       );
@@ -176,7 +176,7 @@ class LyricsServiceClass {
         const data = await happiRes.json();
         if (data.result?.[0]?.api_lyrics) {
           const lyricsRes = await fetch(data.result[0].api_lyrics, {
-            headers: { "x-happi-key": "demo" },
+            headers: { "x-happi-key": HAPPI_API_KEY },
             signal: AbortSignal.timeout(5000),
           });
           if (lyricsRes.ok) {

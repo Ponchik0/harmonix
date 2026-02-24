@@ -18,6 +18,7 @@ import {
   HiOutlineDocumentDuplicate,
   HiOutlineArrowUpTray,
   HiOutlineSignalSlash,
+  HiOutlineArrowPath,
 } from "react-icons/hi2";
 import { FaSoundcloud, FaSpotify, FaYoutube } from "react-icons/fa";
 import { SiVk } from "react-icons/si";
@@ -28,10 +29,11 @@ import { offlineTracksService } from "../../services/OfflineTracksService";
 import { audioService } from "../../services/AudioService";
 import { soundCloudService } from "../../services/SoundCloudService";
 import { artworkService } from "../../services/ArtworkService";
+import { playlistRefreshService } from "../../services/PlaylistRefreshService";
 import { useQueueStore } from "../../stores/queueStore";
 import { usePlayerStore } from "../../stores/playerStore";
 import { useUserStore } from "../../stores/userStore";
-import type { Playlist, Track } from "../../types";
+import type { Playlist, Track, SoundCloudPlaylist } from "../../types";
 
 // Service icon component (small SVG icons)
 function ServiceIcon({ platform, size = 12 }: { platform?: string; size?: number }) {
@@ -305,6 +307,14 @@ export function LibraryView() {
   const [importError, setImportError] = useState("");
   const [importTarget, setImportTarget] = useState<"liked" | "playlist">("liked");
   
+  // Profile import state
+  const [showProfileContent, setShowProfileContent] = useState(false);
+  const [profileLikes, setProfileLikes] = useState<Track[]>([]);
+  const [profilePlaylists, setProfilePlaylists] = useState<SoundCloudPlaylist[]>([]);
+  const [selectedProfileItem, setSelectedProfileItem] = useState<{ type: "likes" | "playlist"; data?: SoundCloudPlaylist } | null>(null);
+  const [profileUsername, setProfileUsername] = useState<string>("");
+  const [profileUserId, setProfileUserId] = useState<string>(""); // Store userId for reliable refresh
+  
   // Cached artworks for tracks with missing covers
   const [cachedArtworks, setCachedArtworks] = useState<Record<string, string>>({});
   // Artwork fetching disabled
@@ -319,6 +329,13 @@ export function LibraryView() {
     if (url.includes("youtube.com") || url.includes("youtu.be")) return { name: "YouTube", color: "#ff0000", icon: FaYoutube };
     if (url.includes("vk.com")) return { name: "VK", color: "#0077ff", icon: SiVk };
     return null;
+  }, [importUrl]);
+
+  // Detect if URL is a profile (no /likes or /sets/)
+  const isProfileUrl = useMemo(() => {
+    const url = importUrl.toLowerCase();
+    if (!url.includes("soundcloud.com")) return false;
+    return !url.includes("/likes") && !url.includes("/sets/") && !url.includes("/tracks");
   }, [importUrl]);
 
   // Detect if URL is a playlist
@@ -337,6 +354,11 @@ export function LibraryView() {
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const jsonInputRef = useRef<HTMLInputElement>(null);
   const [jsonImportError, setJsonImportError] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // New tracks modal state
+  const [showNewTracksModal, setShowNewTracksModal] = useState(false);
+  const [newTracks, setNewTracks] = useState<Track[]>([]);
 
   const { addToQueue, clearQueue } = useQueueStore();
   // Use selectors to prevent re-renders from progress updates
@@ -1094,6 +1116,163 @@ export function LibraryView() {
     reader.readAsDataURL(file);
   };
 
+  // Load profile content (likes and playlists)
+  const handleLoadProfile = async () => {
+    if (!importUrl.trim()) return;
+    
+    setImportLoading(true);
+    setImportError("");
+    setShowProfileContent(false);
+    setProfileLikes([]);
+    setProfilePlaylists([]);
+    setSelectedProfileItem(null);
+    
+    try {
+      const url = importUrl.trim();
+      console.log("[LibraryView] Loading profile:", url);
+      
+      // Resolve URL to get user data
+      const response = await fetch(
+        `https://api-v2.soundcloud.com/resolve?url=${encodeURIComponent(url)}&client_id=${soundCloudService.clientId}`
+      );
+      
+      if (!response.ok) {
+        throw new Error("Не удалось найти профиль. Проверьте ссылку.");
+      }
+      
+      const userData = await response.json();
+      if (!userData.id) {
+        throw new Error("Не удалось получить данные профиля");
+      }
+      
+      const userId = String(userData.id);
+      const username = userData.username || "Пользователь";
+      
+      console.log("[LibraryView] Resolved user:", username, userId);
+      setProfileUsername(username);
+      setProfileUserId(userId); // Save userId for later use
+      
+      // Fetch likes and playlists in parallel
+      const [likes, playlists] = await Promise.all([
+        soundCloudService.getUserLikes(userId, 200), // Load more likes on import
+        soundCloudService.getUserPlaylists(userId, 50)
+      ]);
+      
+      console.log("[LibraryView] Loaded:", likes.length, "likes,", playlists.length, "playlists");
+      
+      setProfileLikes(likes);
+      setProfilePlaylists(playlists);
+      setShowProfileContent(true);
+      
+      if (likes.length === 0 && playlists.length === 0) {
+        setImportError("Профиль пуст или приватный");
+      }
+    } catch (error: any) {
+      console.error("[LibraryView] Profile load error:", error);
+      setImportError(error.message || "Ошибка загрузки профиля");
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
+  // Import selected profile item
+  const handleImportProfileItem = async () => {
+    if (!selectedProfileItem) return;
+    
+    setImportLoading(true);
+    setImportError("");
+    
+    try {
+      let tracksToImport: Track[] = [];
+      let playlistName = "";
+      let sourceUrl = "";
+      
+      if (selectedProfileItem.type === "likes") {
+        tracksToImport = profileLikes;
+        playlistName = `${profileUsername} - Лайки`;
+        sourceUrl = `https://soundcloud.com/${profileUsername}/likes`;
+      } else if (selectedProfileItem.data) {
+        // Import playlist
+        const playlistId = selectedProfileItem.data.id.replace("sc-playlist-", "");
+        tracksToImport = await soundCloudService.getPlaylistTracks(playlistId);
+        playlistName = selectedProfileItem.data.title;
+        sourceUrl = `https://soundcloud.com/${profileUsername}/sets/${playlistId}`;
+      }
+      
+      if (tracksToImport.length === 0) {
+        throw new Error("Нет треков для импорта");
+      }
+      
+      // Import to target
+      let added = 0;
+      if (importTarget === "liked" && selectedProfileItem.type === "likes") {
+        // Add to liked tracks
+        for (const track of tracksToImport) {
+          if (!likedTracksService.isLiked(track.id)) {
+            likedTracksService.addLikedTrack(track);
+            added++;
+          }
+        }
+        
+        // Save source URL
+        likedTracksService.setSourceUrl(sourceUrl);
+        
+        incrementStat("likedTracks", added);
+        
+        window.dispatchEvent(new CustomEvent("show-toast", {
+          detail: { 
+            message: `Добавлено ${added} треков в лайки`, 
+            type: "success" 
+          }
+        }));
+      } else {
+        // Create new playlist
+        const newPlaylist = playlistService.createPlaylist(playlistName);
+        
+        // Update playlist with sourceUrl, source, userId, and initial refresh date
+        playlistService.updatePlaylist(newPlaylist.id, {
+          sourceUrl: sourceUrl,
+          source: "soundcloud",
+          sourceUserId: selectedProfileItem.type === "likes" ? profileUserId : undefined, // Save userId for likes
+          lastRefreshDate: new Date().toISOString(), // Set initial refresh date
+        });
+        
+        for (const track of tracksToImport) {
+          playlistService.addTrackToPlaylist(newPlaylist.id, track);
+          added++;
+        }
+        
+        // Reload to get updated playlist
+        loadData();
+        const updatedPlaylist = playlistService.getPlaylist(newPlaylist.id);
+        
+        // Select the new playlist
+        if (updatedPlaylist) {
+          setSelected({ type: "playlist", id: updatedPlaylist.id, playlist: updatedPlaylist });
+        }
+        
+        window.dispatchEvent(new CustomEvent("show-toast", {
+          detail: { 
+            message: `Создан плейлист "${playlistName}" с ${added} треками`, 
+            type: "success" 
+          }
+        }));
+      }
+      
+      loadData();
+      setShowImportModal(false);
+      setImportUrl("");
+      setImportTarget("liked");
+      setShowProfileContent(false);
+      setSelectedProfileItem(null);
+    } catch (error: any) {
+      console.error("[LibraryView] Import profile item error:", error);
+      setImportError(error.message || "Ошибка импорта");
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
   const handleImport = async () => {
     if (!importUrl.trim()) return;
     setImportLoading(true);
@@ -1103,24 +1282,81 @@ export function LibraryView() {
       const urlLower = url.toLowerCase();
       let tracksToImport: Track[] = [];
       let playlistName = "";
+      let sourceUrl = url;
       
       if (urlLower.includes("soundcloud.com")) {
         if (urlLower.includes("/likes")) {
-          // Import likes
-          const match = url.match(/soundcloud\.com\/([^\/\?]+)\/likes/);
-          if (!match) throw new Error("Неверная ссылка на лайки");
-          const user = await soundCloudService.resolveUser(`https://soundcloud.com/${match[1]}`);
-          if (!user) throw new Error("Пользователь не найден");
-          tracksToImport = await soundCloudService.getUserLikes(user.id.replace("sc-user-", ""), 200);
-          if (tracksToImport.length === 0) throw new Error("Лайки не найдены или профиль приватный");
-          playlistName = `${user.username} - Лайки`;
+          // Import likes from SoundCloud user
+          console.log("[LibraryView] Importing likes from:", url);
+          
+          // Resolve URL to get user ID
+          try {
+            const response = await fetch(
+              `https://api-v2.soundcloud.com/resolve?url=${encodeURIComponent(url)}&client_id=${soundCloudService.clientId}`
+            );
+            
+            if (!response.ok) {
+              throw new Error("Не удалось найти пользователя. Проверьте ссылку.");
+            }
+            
+            const userData = await response.json();
+            if (!userData.id) {
+              throw new Error("Не удалось получить ID пользователя");
+            }
+            
+            const userId = String(userData.id);
+            console.log("[LibraryView] Resolved user ID:", userId);
+            
+            // Fetch user's likes
+            tracksToImport = await soundCloudService.getUserLikes(userId, 200);
+            
+            if (tracksToImport.length === 0) {
+              throw new Error("Лайки не найдены или профиль приватный");
+            }
+            
+            playlistName = `${userData.username || "Пользователь"} - Лайки`;
+            
+            // Save source URL for future refreshes
+            if (importTarget === "liked") {
+              likedTracksService.setSourceUrl(url);
+            }
+          } catch (error) {
+            console.error("[LibraryView] Error importing likes:", error);
+            throw error;
+          }
         } else if (urlLower.includes("/sets/")) {
-          // Import playlist
-          tracksToImport = await soundCloudService.resolvePlaylistUrl(url);
-          if (tracksToImport.length === 0) throw new Error("Плейлист пуст или недоступен");
-          // Extract playlist name from URL
-          const nameMatch = url.match(/\/sets\/([^\/\?]+)/);
-          playlistName = nameMatch ? decodeURIComponent(nameMatch[1]).replace(/-/g, " ") : "Импортированный плейлист";
+          // Import playlist from SoundCloud
+          console.log("[LibraryView] Importing playlist from:", url);
+          
+          try {
+            const response = await fetch(
+              `https://api-v2.soundcloud.com/resolve?url=${encodeURIComponent(url)}&client_id=${soundCloudService.clientId}`
+            );
+            
+            if (!response.ok) {
+              throw new Error("Не удалось найти плейлист. Проверьте ссылку.");
+            }
+            
+            const playlistData = await response.json();
+            if (!playlistData.id) {
+              throw new Error("Не удалось получить ID плейлиста");
+            }
+            
+            const playlistId = String(playlistData.id);
+            console.log("[LibraryView] Resolved playlist ID:", playlistId);
+            
+            // Fetch playlist tracks
+            tracksToImport = await soundCloudService.getPlaylistTracks(playlistId);
+            
+            if (tracksToImport.length === 0) {
+              throw new Error("Плейлист пуст или недоступен");
+            }
+            
+            playlistName = playlistData.title || "Импортированный плейлист";
+          } catch (error) {
+            console.error("[LibraryView] Error importing playlist:", error);
+            throw error;
+          }
         } else {
           throw new Error("Вставьте ссылку на лайки (/likes) или плейлист (/sets/)");
         }
@@ -1131,7 +1367,7 @@ export function LibraryView() {
       } else if (urlLower.includes("vk.com")) {
         throw new Error("Импорт из VK скоро");
       } else {
-        throw new Error("Неподдерживаемая ссылка");
+        throw new Error("Неподдерживаемая ссылка. Поддерживаются: SoundCloud");
       }
 
       // Import to target
@@ -1145,15 +1381,44 @@ export function LibraryView() {
           }
         }
         incrementStat("likedTracks", added);
+        
+        window.dispatchEvent(new CustomEvent("show-toast", {
+          detail: { 
+            message: `Добавлено ${added} треков в лайки`, 
+            type: "success" 
+          }
+        }));
       } else {
-        // Create new playlist
+        // Create new playlist with sourceUrl
         const newPlaylist = playlistService.createPlaylist(playlistName);
+        
+        // Update playlist with sourceUrl, source, and initial refresh date
+        playlistService.updatePlaylist(newPlaylist.id, {
+          sourceUrl: sourceUrl,
+          source: "soundcloud",
+          lastRefreshDate: new Date().toISOString(), // Set initial refresh date
+        });
+        
         for (const track of tracksToImport) {
           playlistService.addTrackToPlaylist(newPlaylist.id, track);
           added++;
         }
+        
+        // Reload to get updated playlist
+        loadData();
+        const updatedPlaylist = playlistService.getPlaylist(newPlaylist.id);
+        
         // Select the new playlist
-        setSelected({ type: "playlist", id: newPlaylist.id, playlist: { ...newPlaylist, tracks: tracksToImport } });
+        if (updatedPlaylist) {
+          setSelected({ type: "playlist", id: updatedPlaylist.id, playlist: updatedPlaylist });
+        }
+        
+        window.dispatchEvent(new CustomEvent("show-toast", {
+          detail: { 
+            message: `Создан плейлист "${playlistName}" с ${added} треками`, 
+            type: "success" 
+          }
+        }));
       }
       
       loadData();
@@ -1161,6 +1426,7 @@ export function LibraryView() {
       setImportUrl("");
       setImportTarget("liked");
     } catch (err: any) {
+      console.error("[LibraryView] Import error:", err);
       setImportError(err.message || "Ошибка импорта");
     } finally {
       setImportLoading(false);
@@ -1509,6 +1775,60 @@ export function LibraryView() {
                       </button>
                     )}
                     
+                    {/* Refresh playlist */}
+                    {selected?.type === "playlist" && (
+                      <button onClick={async () => {
+                        if (isRefreshing || !selected.playlist) return;
+                        
+                        setIsRefreshing(true);
+                        setShowOptionsMenu(false);
+                        
+                        try {
+                          const result = await playlistRefreshService.refreshPlaylist(selected.playlist);
+                          
+                          if (result.success) {
+                            loadData();
+                            
+                            if (result.addedCount > 0) {
+                              // Show modal with new tracks
+                              setNewTracks(result.addedTracks);
+                              setShowNewTracksModal(true);
+                            } else {
+                              window.dispatchEvent(new CustomEvent("show-toast", {
+                                detail: { 
+                                  message: "Плейлист актуален, новых треков нет", 
+                                  type: "info" 
+                                }
+                              }));
+                            }
+                          } else {
+                            window.dispatchEvent(new CustomEvent("show-toast", {
+                              detail: { 
+                                message: result.error || "Ошибка при обновлении плейлиста", 
+                                type: "error" 
+                              }
+                            }));
+                          }
+                        } catch (error) {
+                          console.error("[LibraryView] Refresh error:", error);
+                          window.dispatchEvent(new CustomEvent("show-toast", {
+                            detail: { 
+                              message: "Ошибка при обновлении плейлиста", 
+                              type: "error" 
+                            }
+                          }));
+                        } finally {
+                          setIsRefreshing(false);
+                        }
+                      }}
+                        disabled={isRefreshing}
+                        className="w-full px-3 py-2 text-left text-xs font-medium transition-all hover:bg-white/5 flex items-center gap-2 disabled:opacity-50"
+                        style={{ color: "var(--interactive-accent)" }}>
+                        <HiOutlineArrowPath size={14} className={isRefreshing ? "animate-spin" : ""} />
+                        Обновить плейлист
+                      </button>
+                    )}
+                    
                     {/* Export */}
                     <button onClick={handleExportPlaylist}
                       disabled={tracks.length === 0}
@@ -1613,93 +1933,240 @@ export function LibraryView() {
       {showImportModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => { setShowImportModal(false); setImportError(""); setImportUrl(""); setImportTarget("liked"); }}>
+          style={{ background: "rgba(0,0,0,0.7)" }} 
+          onClick={() => { 
+            setShowImportModal(false); 
+            setImportError(""); 
+            setImportUrl(""); 
+            setImportTarget("liked");
+            setShowProfileContent(false);
+            setSelectedProfileItem(null);
+          }}>
           <div
-            onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-2xl overflow-hidden"
-            style={{ background: "var(--surface-card)", border: "1px solid var(--border-base)" }}>
+            onClick={(e) => e.stopPropagation()} 
+            className="w-full max-w-md rounded-2xl overflow-hidden"
+            style={{ background: "var(--surface-card)", border: "1px solid var(--border-base)", maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
               
               {/* Header */}
               <div className="p-5 pb-4">
                 <h2 className="font-bold text-lg" style={{ color: "var(--text-primary)" }}>Импорт треков</h2>
-                <p className="text-xs mt-1" style={{ color: "var(--text-subtle)" }}>Вставьте ссылку на плейлист или лайки</p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-subtle)" }}>
+                  {showProfileContent ? "Выберите что импортировать" : "Вставьте ссылку на профиль, плейлист или лайки"}
+                </p>
               </div>
               
-              {/* Input */}
-              <div className="px-5">
-                <div className="relative">
-                  <input type="text" value={importUrl} onChange={(e) => setImportUrl(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleImport()}
-                    placeholder="Вставьте ссылку..."
-                    className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none pr-12"
-                    style={{ 
-                      background: "var(--surface-elevated)", 
-                      color: "var(--text-primary)", 
-                      border: detectedService ? `2px solid ${detectedService.color}` : "1px solid var(--border-base)",
-                    }} 
-                    autoFocus />
-                  {detectedService && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <detectedService.icon size={20} style={{ color: detectedService.color }} />
+              {!showProfileContent ? (
+                <>
+                  {/* Input */}
+                  <div className="px-5">
+                    <div className="relative">
+                      <input type="text" value={importUrl} onChange={(e) => setImportUrl(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && (isProfileUrl ? handleLoadProfile() : handleImport())}
+                        placeholder="Вставьте ссылку..."
+                        className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none pr-12"
+                        style={{ 
+                          background: "var(--surface-elevated)", 
+                          color: "var(--text-primary)", 
+                          border: detectedService ? `2px solid ${detectedService.color}` : "1px solid var(--border-base)",
+                        }} 
+                        autoFocus />
+                      {detectedService && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <detectedService.icon size={20} style={{ color: detectedService.color }} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Import target selection - only for likes URLs */}
+                  {!isPlaylistUrl && !isProfileUrl && importUrl.trim() && importUrl.includes("/likes") && (
+                    <div className="px-5 mt-3">
+                      <p className="text-xs mb-2" style={{ color: "var(--text-subtle)" }}>Импортировать в:</p>
+                      <div className="flex gap-2">
+                        <button onClick={() => setImportTarget("liked")}
+                          className="flex-1 py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all"
+                          style={{
+                            background: importTarget === "liked" ? "rgba(248, 113, 113, 0.2)" : "var(--surface-elevated)",
+                            color: importTarget === "liked" ? "#f87171" : "var(--text-secondary)",
+                            border: importTarget === "liked" ? "1px solid #f87171" : "1px solid var(--border-base)",
+                          }}>
+                          <HiOutlineHeart size={14} /> Любимые
+                        </button>
+                        <button onClick={() => setImportTarget("playlist")}
+                          className="flex-1 py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all"
+                          style={{
+                            background: importTarget === "playlist" ? "color-mix(in srgb, var(--interactive-accent) 20%, transparent)" : "var(--surface-elevated)",
+                            color: importTarget === "playlist" ? "var(--interactive-accent)" : "var(--text-secondary)",
+                            border: importTarget === "playlist" ? "1px solid var(--interactive-accent)" : "1px solid var(--border-base)",
+                          }}>
+                          <HiOutlinePlus size={14} /> Новый плейлист
+                        </button>
+                      </div>
                     </div>
                   )}
-                </div>
-              </div>
 
-              {/* Import target selection - only for likes */}
-              {!isPlaylistUrl && importUrl.trim() && (
-                <div className="px-5 mt-3">
-                  <p className="text-xs mb-2" style={{ color: "var(--text-subtle)" }}>Импортировать в:</p>
-                  <div className="flex gap-2">
-                    <button onClick={() => setImportTarget("liked")}
-                      className="flex-1 py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all"
-                      style={{
-                        background: importTarget === "liked" ? "rgba(248, 113, 113, 0.2)" : "var(--surface-elevated)",
-                        color: importTarget === "liked" ? "#f87171" : "var(--text-secondary)",
-                        border: importTarget === "liked" ? "1px solid #f87171" : "1px solid var(--border-base)",
+                  {/* Info for playlist URLs */}
+                  {isPlaylistUrl && importUrl.trim() && (
+                    <div className="px-5 mt-3">
+                      <div className="p-2.5 rounded-lg flex items-center gap-2" style={{ background: "var(--surface-elevated)" }}>
+                        <HiOutlineMusicalNote size={16} style={{ color: "var(--interactive-accent)" }} />
+                        <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Будет создан новый плейлист</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {importError && <p className="text-xs text-red-400 px-5 mt-3">{importError}</p>}
+                  
+                  {/* Buttons */}
+                  <div className="flex gap-2 p-5 pt-4 mt-2 border-t" style={{ borderColor: "var(--border-base)" }}>
+                    <button onClick={() => { 
+                      setShowImportModal(false); 
+                      setImportError(""); 
+                      setImportUrl(""); 
+                      setImportTarget("liked");
+                      setShowProfileContent(false);
+                      setSelectedProfileItem(null);
+                    }}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-medium"
+                      style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}>Отмена</button>
+                    <button 
+                      onClick={isProfileUrl ? handleLoadProfile : handleImport} 
+                      disabled={!importUrl.trim() || importLoading}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
+                      style={{ 
+                        background: detectedService?.color || "var(--interactive-accent)",
+                        color: "var(--interactive-accent-text)"
                       }}>
-                      <HiOutlineHeart size={14} /> Любимые
-                    </button>
-                    <button onClick={() => setImportTarget("playlist")}
-                      className="flex-1 py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all"
-                      style={{
-                        background: importTarget === "playlist" ? "color-mix(in srgb, var(--interactive-accent) 20%, transparent)" : "var(--surface-elevated)",
-                        color: importTarget === "playlist" ? "var(--interactive-accent)" : "var(--text-secondary)",
-                        border: importTarget === "playlist" ? "1px solid var(--interactive-accent)" : "1px solid var(--border-base)",
-                      }}>
-                      <HiOutlinePlus size={14} /> Новый плейлист
+                      {importLoading ? (
+                        <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{isProfileUrl ? "Загрузка..." : "Импорт..."}</>
+                      ) : (isProfileUrl ? "Загрузить" : "Импортировать")}
                     </button>
                   </div>
-                </div>
-              )}
+                </>
+              ) : (
+                <>
+                  {/* Profile content selection */}
+                  <div className="flex-1 overflow-y-auto px-5" style={{ maxHeight: "400px" }}>
+                    {/* Likes */}
+                    {profileLikes.length > 0 && (
+                      <div className="mb-3">
+                        <button
+                          onClick={() => setSelectedProfileItem({ type: "likes" })}
+                          className="w-full p-3 rounded-xl text-left transition-all"
+                          style={{
+                            background: selectedProfileItem?.type === "likes" ? "color-mix(in srgb, var(--interactive-accent) 20%, transparent)" : "var(--surface-elevated)",
+                            border: selectedProfileItem?.type === "likes" ? "2px solid var(--interactive-accent)" : "1px solid var(--border-base)",
+                          }}>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: "rgba(248, 113, 113, 0.2)" }}>
+                              <HiOutlineHeart size={20} className="text-red-400" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>Лайкнутые треки</p>
+                              <p className="text-xs" style={{ color: "var(--text-subtle)" }}>{profileLikes.length} треков</p>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    )}
 
-              {/* Info for playlist URLs */}
-              {isPlaylistUrl && importUrl.trim() && (
-                <div className="px-5 mt-3">
-                  <div className="p-2.5 rounded-lg flex items-center gap-2" style={{ background: "var(--surface-elevated)" }}>
-                    <HiOutlineMusicalNote size={16} style={{ color: "var(--interactive-accent)" }} />
-                    <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Будет создан новый плейлист</span>
+                    {/* Playlists */}
+                    {profilePlaylists.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider mb-2 px-1" style={{ color: "var(--text-subtle)" }}>
+                          Плейлисты ({profilePlaylists.length})
+                        </p>
+                        <div className="space-y-2">
+                          {profilePlaylists.map((playlist) => (
+                            <button
+                              key={playlist.id}
+                              onClick={() => setSelectedProfileItem({ type: "playlist", data: playlist })}
+                              className="w-full p-3 rounded-xl text-left transition-all"
+                              style={{
+                                background: selectedProfileItem?.data?.id === playlist.id ? "color-mix(in srgb, var(--interactive-accent) 20%, transparent)" : "var(--surface-elevated)",
+                                border: selectedProfileItem?.data?.id === playlist.id ? "2px solid var(--interactive-accent)" : "1px solid var(--border-base)",
+                              }}>
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0" style={{ background: "var(--surface-card)" }}>
+                                  {playlist.artworkUrl ? (
+                                    <img src={playlist.artworkUrl} alt="" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <HiOutlineMusicalNote size={18} style={{ color: "var(--text-subtle)" }} />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm truncate" style={{ color: "var(--text-primary)" }}>{playlist.title}</p>
+                                  <p className="text-xs" style={{ color: "var(--text-subtle)" }}>{playlist.trackCount} треков</p>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+
+                  {/* Import target selection for profile items */}
+                  {selectedProfileItem && (
+                    <div className="px-5 mt-3 pb-3">
+                      <p className="text-xs mb-2" style={{ color: "var(--text-subtle)" }}>Импортировать в:</p>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => setImportTarget("liked")}
+                          disabled={selectedProfileItem.type !== "likes"}
+                          className="flex-1 py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-30"
+                          style={{
+                            background: importTarget === "liked" ? "rgba(248, 113, 113, 0.2)" : "var(--surface-elevated)",
+                            color: importTarget === "liked" ? "#f87171" : "var(--text-secondary)",
+                            border: importTarget === "liked" ? "1px solid #f87171" : "1px solid var(--border-base)",
+                          }}>
+                          <HiOutlineHeart size={14} /> Любимые
+                        </button>
+                        <button 
+                          onClick={() => setImportTarget("playlist")}
+                          className="flex-1 py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all"
+                          style={{
+                            background: importTarget === "playlist" ? "color-mix(in srgb, var(--interactive-accent) 20%, transparent)" : "var(--surface-elevated)",
+                            color: importTarget === "playlist" ? "var(--interactive-accent)" : "var(--text-secondary)",
+                            border: importTarget === "playlist" ? "1px solid var(--interactive-accent)" : "1px solid var(--border-base)",
+                          }}>
+                          <HiOutlinePlus size={14} /> Новый плейлист
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {importError && <p className="text-xs text-red-400 px-5 mt-2">{importError}</p>}
+
+                  {/* Buttons */}
+                  <div className="flex gap-2 p-5 pt-4 border-t" style={{ borderColor: "var(--border-base)" }}>
+                    <button 
+                      onClick={() => {
+                        setShowProfileContent(false);
+                        setSelectedProfileItem(null);
+                        setImportError("");
+                      }}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-medium"
+                      style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}>
+                      Назад
+                    </button>
+                    <button 
+                      onClick={handleImportProfileItem}
+                      disabled={!selectedProfileItem || importLoading}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
+                      style={{ 
+                        background: "var(--interactive-accent)",
+                        color: "var(--interactive-accent-text)"
+                      }}>
+                      {importLoading ? (
+                        <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Импорт...</>
+                      ) : "Импортировать"}
+                    </button>
+                  </div>
+                </>
               )}
-              
-              {importError && <p className="text-xs text-red-400 px-5 mt-3">{importError}</p>}
-              
-              {/* Buttons */}
-              <div className="flex gap-2 p-5 pt-4 mt-2 border-t" style={{ borderColor: "var(--border-base)" }}>
-                <button onClick={() => { setShowImportModal(false); setImportError(""); setImportUrl(""); setImportTarget("liked"); }}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-medium"
-                  style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}>Отмена</button>
-                <button onClick={handleImport} disabled={!importUrl.trim() || importLoading}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
-                  style={{ 
-                    background: detectedService?.color || "var(--interactive-accent)",
-                    color: "white"
-                  }}>
-                  {importLoading ? (
-                    <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Импорт...</>
-                  ) : "Импортировать"}
-                </button>
-              </div>
             </div>
           </div>
         )}
@@ -1762,6 +2229,68 @@ export function LibraryView() {
                   Отлично
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Tracks Modal */}
+      {showNewTracksModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => { setShowNewTracksModal(false); setNewTracks([]); }}>
+          <div className="w-full max-w-lg rounded-2xl overflow-hidden" style={{ background: "var(--surface-card)", border: "1px solid var(--border-base)", maxHeight: "80vh", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="p-5 pb-4 border-b" style={{ borderColor: "var(--border-base)" }}>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-500/20">
+                  <HiOutlineCheck size={24} className="text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+                    Добавлено {newTracks.length} {newTracks.length === 1 ? "трек" : newTracks.length < 5 ? "трека" : "треков"}
+                  </h3>
+                  <p className="text-sm" style={{ color: "var(--text-subtle)" }}>
+                    Новые треки из обновления
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tracks List */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+              <div className="space-y-2">
+                {newTracks.map((track, i) => (
+                  <div key={track.id} className="flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-white/5" style={{ background: "var(--surface-elevated)" }}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style={{ background: "var(--interactive-accent)", color: "var(--interactive-accent-text)" }}>
+                      {i + 1}
+                    </div>
+                    <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0" style={{ background: "var(--surface-card)" }}>
+                      {track.artworkUrl ? (
+                        <img src={track.artworkUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <HiOutlineMusicalNote size={18} style={{ color: "var(--text-subtle)" }} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{track.title}</p>
+                      <p className="text-xs truncate" style={{ color: "var(--text-subtle)" }}>{track.artist}</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <ServiceIcon platform={track.platform} size={14} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t" style={{ borderColor: "var(--border-base)" }}>
+              <button onClick={() => { setShowNewTracksModal(false); setNewTracks([]); }}
+                className="w-full py-2.5 rounded-xl font-medium transition-all"
+                style={{ background: "var(--interactive-accent)", color: "var(--interactive-accent-text)" }}>
+                Отлично
+              </button>
             </div>
           </div>
         </div>

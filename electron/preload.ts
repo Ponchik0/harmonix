@@ -174,22 +174,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
   },
 
-  // Auto updater
-  updater: {
-    check: (): Promise<UpdateCheckResult> =>
-      ipcRenderer.invoke("updater:check"),
-    download: (): Promise<UpdateDownloadResult> =>
-      ipcRenderer.invoke("updater:download"),
-    install: (): Promise<{ success: boolean }> =>
-      ipcRenderer.invoke("updater:install"),
-    getCurrentVersion: (): Promise<{ version: string }> =>
-      ipcRenderer.invoke("updater:getCurrentVersion"),
-    onUpdateStatus: (callback: (status: UpdateStatus) => void) => {
-      ipcRenderer.on("update-status", (_event, status) => callback(status));
-    },
-    removeUpdateStatusListener: () => {
-      ipcRenderer.removeAllListeners("update-status");
-    },
+  // Persistent storage (shared between dev & production)
+  persistentStorage: {
+    saveLocalStorage: (data: Record<string, string>): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke("persistentStorage:saveLocalStorage", data),
+    loadLocalStorage: (): Promise<{ success: boolean; data: Record<string, string>; error?: string }> =>
+      ipcRenderer.invoke("persistentStorage:loadLocalStorage"),
+    saveIndexedDB: (data: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke("persistentStorage:saveIndexedDB", data),
+    loadIndexedDB: (): Promise<{ success: boolean; data: string | null; error?: string }> =>
+      ipcRenderer.invoke("persistentStorage:loadIndexedDB"),
+    getDataPath: (): Promise<{ path: string }> =>
+      ipcRenderer.invoke("persistentStorage:getDataPath"),
   },
 });
 
@@ -242,6 +238,13 @@ declare global {
         removeImportListener: () => void;
         onTrack: (callback: (trackData: string) => void) => void;
         removeTrackListener: () => void;
+      };
+      persistentStorage: {
+        saveLocalStorage: (data: Record<string, string>) => Promise<{ success: boolean; error?: string }>;
+        loadLocalStorage: () => Promise<{ success: boolean; data: Record<string, string>; error?: string }>;
+        saveIndexedDB: (data: string) => Promise<{ success: boolean; error?: string }>;
+        loadIndexedDB: () => Promise<{ success: boolean; data: string | null; error?: string }>;
+        getDataPath: () => Promise<{ path: string }>;
       };
       updater: {
         check: () => Promise<UpdateCheckResult>;

@@ -4,8 +4,8 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 // ============================================
 // SUPABASE НАСТРОЙКИ
 // ============================================
-const SUPABASE_URL = 'https://tgynknhfivavdapobhfk.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_prwmgRXctafvILbt99zSbg_IkMtavGP';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 // ============================================
 
 // Типы для таблиц

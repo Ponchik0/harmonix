@@ -13,7 +13,7 @@ import {
   IoChevronUp,
   IoOptions,
 } from "react-icons/io5";
-import { HiOutlinePlay, HiOutlinePause } from "react-icons/hi2";
+import { HiOutlinePlay, HiOutlinePause, HiOutlineCheckBadge } from "react-icons/hi2";
 import { PlayerBarProps } from "./types";
 
 export const PlayerBarClassic = memo(function PlayerBarClassic({
@@ -47,6 +47,8 @@ export const PlayerBarClassic = memo(function PlayerBarClassic({
   onVolDragEnd,
   onExpand,
   onTrackClick,
+  onArtistClick,
+  isArtistVerified,
   onEqualizerClick,
   formatTime,
 }: PlayerBarProps) {
@@ -57,7 +59,6 @@ export const PlayerBarClassic = memo(function PlayerBarClassic({
   
   // Theme-aware colors
   const iconColor = isLightTheme ? "rgba(0,0,0,0.7)" : colors.textSecondary;
-  const iconColorActive = isLightTheme ? "rgba(0,0,0,0.8)" : colors.textSecondary;
   const hoverBg = isLightTheme ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)";
 
   return (
@@ -148,7 +149,7 @@ export const PlayerBarClassic = memo(function PlayerBarClassic({
           {currentTrack ? (
             <>
               <div className="relative w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
-                {artworkUrl && artworkUrl !== "/icon.svg" ? (
+                {artworkUrl ? (
                   <img 
                     src={artworkUrl} 
                     alt="" 
@@ -159,7 +160,7 @@ export const PlayerBarClassic = memo(function PlayerBarClassic({
                   />
                 ) : null}
                 {/* Transparent background when no artwork */}
-                {(!artworkUrl || artworkUrl === "/icon.svg") && (
+                {!artworkUrl && (
                   <div className="absolute inset-0 bg-white/5" />
                 )}
                 {displayPlaying && (
@@ -172,7 +173,10 @@ export const PlayerBarClassic = memo(function PlayerBarClassic({
               </div>
               <div className={`flex-1 min-w-0 ${getTitleAlign()}`}>
                 <p className="text-sm font-medium truncate" style={{ color: colors.textPrimary }}>{currentTrack.title}</p>
-                <p className="text-xs truncate" style={{ color: colors.textSecondary }}>{currentTrack.artist}</p>
+                <div className="flex items-center gap-1 min-w-0">
+                  <p className="text-xs truncate cursor-pointer hover:underline transition-all" style={{ color: colors.textSecondary }} onClick={(e) => { e.stopPropagation(); onArtistClick(); }}>{currentTrack.artist}</p>
+                  {isArtistVerified && <HiOutlineCheckBadge size={14} className="flex-shrink-0" style={{ color: '#3B82F6' }} />}
+                </div>
               </div>
               <button type="button" onClick={(e) => { e.stopPropagation(); onLikeClick(); }}
                 className="w-8 h-8 flex items-center justify-center rounded-full transition-all hover:scale-110"

@@ -848,17 +848,39 @@ export function HomeView() {
       <div className="p-6 pb-32 space-y-8 max-w-[1600px] mx-auto">
         {/* Hero Section - My Wave */}
         <section
-          className="relative rounded-3xl overflow-hidden"
+          className="relative rounded-3xl overflow-hidden glass-fluid liquid-border"
           style={{
-            background: `linear-gradient(135deg, ${colors.surface} 0%, ${colors.background} 100%)`,
-            border: `1px solid ${colors.textSecondary}10`,
             opacity: mounted ? 1 : 0,
             transform: mounted ? "translateY(0)" : "translateY(30px)",
             transition: "all 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          {/* Canvas Wave Animation */}
-          <WaveCanvas accentColor={colors.accent} />
+          {/* Fluid Aurora Background */}
+          <div className="aurora-bg" style={{ opacity: 0.15 }} />
+          
+          {/* Accent Blobs */}
+          <div
+            className="fluid-blob animate-blob-morph"
+            style={{
+              width: "60%",
+              height: "80%",
+              top: 0,
+              right: 0,
+              backgroundColor: `${colors.accent}18`,
+              animationDelay: "-2s",
+            }}
+          />
+          <div
+            className="fluid-blob animate-float-rotate"
+            style={{
+              width: "40%",
+              height: "60%",
+              bottom: 0,
+              left: 0,
+              backgroundColor: `${colors.accent}0c`,
+              animationDelay: "-6s",
+            }}
+          />
 
           <div className="relative p-8 flex flex-col lg:flex-row items-center gap-8 z-10">
             {/* Left side - Wave info */}
@@ -885,7 +907,7 @@ export function HomeView() {
                 </span>
               </div>
 
-              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight">
+              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-gradient">
                 Моя волна
               </h1>
 
@@ -942,11 +964,14 @@ export function HomeView() {
               <button
                 onClick={handleMyWave}
                 disabled={loadingWave}
-                className="relative w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 group"
+                className="relative w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 ease-spring hover:scale-105 group"
                 style={{
                   background: "#ffffff",
+                  boxShadow: "0 0 30px var(--glow-color, rgba(255,255,255,0.15))",
                 }}
               >
+                {/* Glow ring */}
+                <div className="glow-ring rounded-full" />
                 {loadingWave ? (
                   <div
                     className="w-10 h-10 border-4 rounded-full animate-spin"
@@ -979,7 +1004,7 @@ export function HomeView() {
           </div>
         </section>
 
-        {/* Quick Actions Grid */}
+        {/* Quick Actions Grid - Bento Layout */}
         <section
           className="grid grid-cols-2 lg:grid-cols-4 gap-4"
           style={{
@@ -1020,23 +1045,36 @@ export function HomeView() {
               color: "#10B981",
               onClick: handleMyWave,
             },
-          ].map((item) => (
+          ].map((item, idx) => (
             <button
               key={item.label}
               onClick={item.onClick}
-              className="group p-4 rounded-2xl flex items-center gap-4 transition-all hover:scale-[1.02]"
+              className={`group p-5 rounded-fluid flex items-center gap-4 transition-all duration-300 ease-fluid hover:-translate-y-1 hover:scale-[1.02] relative overflow-hidden ${
+                idx === 0 ? 'lg:col-span-2 lg:row-span-1' : ''
+              }`}
               style={{
-                background: `${item.color}08`,
+                background: `${item.color}0a`,
                 border: `1px solid ${item.color}15`,
+                backdropFilter: "blur(20px)",
               }}
             >
+              {/* Subtle gradient blob */}
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
-                style={{ background: `${item.color}15` }}
+                className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{
+                  background: `radial-gradient(circle, ${item.color}20, transparent 70%)`,
+                  filter: "blur(20px)",
+                }}
+              />
+              <div
+                className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ease-spring group-hover:scale-110 group-hover:rotate-3"
+                style={{
+                  background: `linear-gradient(135deg, ${item.color}20, ${item.color}08)`,
+                }}
               >
                 <item.icon className="text-2xl" style={{ color: item.color }} />
               </div>
-              <div className="text-left">
+              <div className="text-left relative z-10">
                 <p className="font-semibold">{item.label}</p>
                 {item.count !== null && (
                   <p
@@ -1399,12 +1437,12 @@ function TrackCard({
         transition: `all 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${index * 50}ms`,
       }}
     >
-      <div className={`${imageSize[size]} rounded-xl overflow-hidden relative mb-2 shadow-md group-hover:shadow-lg transition-all`}>
+      <div className={`${imageSize[size]} rounded-2xl overflow-hidden relative mb-2 transition-all duration-300 ease-fluid group-hover:shadow-glow-sm group-hover:-translate-y-1`}>
         {track.artworkUrl ? (
           <img
             src={track.artworkUrl}
             alt=""
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 ease-fluid group-hover:scale-105"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
               (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
@@ -1418,14 +1456,15 @@ function TrackCard({
           <HiOutlineMusicalNote className="text-white text-2xl mb-1" />
           <span className="text-[8px] text-white/60 px-2 text-center truncate max-w-full">{track.artist}</span>
         </div>
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform duration-200 shadow-lg" style={{ background: "var(--interactive-accent)", color: "var(--interactive-accent-text)" }}>
+        {/* Gradient hover overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-spring">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform duration-300 ease-spring shadow-glow-sm backdrop-blur-xl" style={{ background: "rgba(255,255,255,0.9)", color: "#000" }}>
             <HiOutlinePlay className="text-lg ml-0.5" />
           </div>
         </div>
         {/* Service icon */}
-        <div className="absolute bottom-1.5 right-1.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center">
+        <div className="absolute bottom-1.5 right-1.5 w-5 h-5 rounded-full bg-black/70 backdrop-blur-sm flex items-center justify-center">
           <ServiceIcon platform={getTrackPlatform(track)} size={10} />
         </div>
       </div>

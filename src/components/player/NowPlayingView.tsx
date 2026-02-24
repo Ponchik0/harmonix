@@ -95,7 +95,7 @@ export function NowPlayingView() {
   const isLightTheme = currentThemeId?.startsWith('light');
   
   // Use custom artwork if enabled, otherwise use track artwork
-  const artworkUrl = (customArtworkEnabled && customArtworkUrl) ? customArtworkUrl : (currentTrack?.artworkUrl || "/icon.svg");
+  const artworkUrl = (customArtworkEnabled && customArtworkUrl) ? customArtworkUrl : (currentTrack?.artworkUrl || "");
   
   const [isLiked, setIsLiked] = useState(false);
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
@@ -494,7 +494,7 @@ export function NowPlayingView() {
               alt={currentTrack.title}
               className="w-full aspect-square object-cover"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "/icon.svg";
+                (e.target as HTMLImageElement).style.display = 'none';
               }}
               style={{ 
                 boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
@@ -1181,11 +1181,11 @@ export function NowPlayingView() {
                     {/* Обложка трека */}
                     <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 relative">
                       <img 
-                        src={track.artworkUrl || "/icon.svg"} 
+                        src={track.artworkUrl || ""} 
                         alt="" 
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = "/icon.svg";
+                          (e.target as HTMLImageElement).style.display = 'none';
                         }}
                       />
                       {/* Service icon */}

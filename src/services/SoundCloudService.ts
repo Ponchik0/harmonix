@@ -37,7 +37,7 @@ interface SoundCloudCollection<T> {
 }
 
 interface SoundCloudSettings {
-  activeToken: "id1" | "id2" | "custom" | "none";
+  activeToken: "id1" | "custom" | "none";
   customToken: string;
   token: string;
   enabled: boolean;
@@ -53,16 +53,10 @@ class SoundCloudService {
   private _clientId: string | null = null;
   private _enabled: boolean = true;
 
-  // Fallback tokens (public, may expire - updated Jan 2026)
+  // Fallback tokens (public, may expire - updated Feb 2026)
   // These are extracted from SoundCloud's web app and may need periodic updates
   private fallbackTokens = [
-    "iZIs9mchVcX5lhVRyQGGAYlNPVldzAoX", // Token 1 (Primary - Default)
-    "a3e059563d7fd3372b49b37f00a00bcf", // Token 2 (Secondary fallback)
-    "YUKXoArFcqrlQn9tfNHvvyfnDISj04zk", // Token 3 (Tertiary fallback)
-    "GSTMg2qyKgpzQB4GUCbPGzO5xJKPNRCL", // Token 4 (Quaternary fallback)
-    "2t9loNQH90kzWcwMCiMppCvzjyHdHirG", // Token 5 (Additional fallback)
-    "fDoItMDbsbZz8dY16ZzARCZmzgHBPotA", // Token 6 (Additional fallback)
-    "knW1rrkzZq7EKRs3wY0k0hqDxv1AqnTs", // Token 7 (Legacy fallback)
+    "EnTrn2ZjaZXfOU7iRsFicZvTOi1Pl3rK", // Token 1 (Primary - Default, extracted Feb 2026)
   ];
   private fallbackIndex = 0; // Начинаем с токена 1
   private tokenFetchAttempted = false;
@@ -178,14 +172,16 @@ class SoundCloudService {
       const scriptMatches = html.match(/https:\/\/a-v2\.sndcdn\.com\/assets\/[^"]+\.js/g);
       if (!scriptMatches) return null;
 
-      // Check each script for client_id
-      for (const scriptUrl of scriptMatches.slice(0, 5)) {
+      // Check ALL scripts for client_id (not just first 5)
+      for (const scriptUrl of scriptMatches) {
         try {
           const scriptResponse = await fetch(scriptUrl);
           const scriptContent = await scriptResponse.text();
           
-          // Look for client_id pattern
-          const clientIdMatch = scriptContent.match(/client_id:"([a-zA-Z0-9]{32})"/);
+          // Look for client_id pattern - multiple regex variants for resilience
+          const clientIdMatch = 
+            scriptContent.match(/client_id[=:]\s*["']([a-zA-Z0-9]{20,40})["']/) ||
+            scriptContent.match(/clientId[=:]\s*["']([a-zA-Z0-9]{20,40})["']/);
           if (clientIdMatch) {
             const newClientId = clientIdMatch[1];
             console.log("[SoundCloud] Found fresh client_id:", newClientId.substring(0, 8) + "...");
@@ -847,7 +843,7 @@ class SoundCloudService {
   });
 
   // Get user's tracks
-  async getUserTracks(userId: string, limit: number = 50): Promise<Track[]> {
+  async getUserTracks(userId: string, limit: number = 50, username?: string): Promise<Track[]> {
     if (!this.hasToken()) return [];
 
     try {
@@ -855,13 +851,74 @@ class SoundCloudService {
       const response = await this.fetchWithRetry(
         `${SOUNDCLOUD_API_V2}/users/${userId}/tracks?limit=${limit}`
       );
-      const data = await response.json();
+      
+      const text = await response.text();
+      if (!text || text.trim().length === 0) {
+        console.error("[SoundCloud] Empty response from getUserTracks");
+        return this.getUserTracksBySearch(username || userId, limit);
+      }
+      
+      let data: any;
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error("[SoundCloud] Failed to parse getUserTracks JSON:", parseError);
+        return this.getUserTracksBySearch(username || userId, limit);
+      }
 
-      const tracks = data.collection?.map(this.mapTrack) || [];
-      console.log(`[SoundCloud] Found ${tracks.length} tracks`);
+      // API can return { collection: [...] } or just an array
+      const rawTracks = Array.isArray(data) ? data : (data.collection || []);
+      const tracks = rawTracks.map(this.mapTrack);
+      console.log(`[SoundCloud] Found ${tracks.length} tracks for user ${userId}`);
+      
+      if (tracks.length === 0 && username) {
+        console.log(`[SoundCloud] No tracks from API, trying search fallback for "${username}"`);
+        return this.getUserTracksBySearch(username, limit);
+      }
+      
       return tracks;
     } catch (error) {
-      console.error("[SoundCloud] Error getting user tracks:", error);
+      console.error("[SoundCloud] Error getting user tracks, trying search fallback:", error);
+      return this.getUserTracksBySearch(username || userId, limit);
+    }
+  }
+
+  // Fallback: get user tracks via search API when /users/{id}/tracks returns 403
+  private async getUserTracksBySearch(username: string, limit: number = 50): Promise<Track[]> {
+    try {
+      console.log(`[SoundCloud] Fallback: searching tracks by "${username}"`);
+      const params = new URLSearchParams({
+        q: username,
+        limit: Math.min(limit, 50).toString(),
+      });
+      
+      const response = await this.fetchWithRetry(
+        `${SOUNDCLOUD_API_V2}/search/tracks?${params}`
+      );
+      
+      if (!response.ok) {
+        console.error(`[SoundCloud] Search fallback failed: ${response.status}`);
+        return [];
+      }
+      
+      const text = await response.text();
+      if (!text || text.trim().length === 0) return [];
+      
+      const data = JSON.parse(text);
+      const allTracks: Track[] = (data.collection || []).map(this.mapTrack);
+      
+      // Filter to only tracks by this artist (case-insensitive match)
+      const artistName = username.toLowerCase();
+      const artistTracks = allTracks.filter(t => 
+        t.artist.toLowerCase() === artistName ||
+        t.artist.toLowerCase().includes(artistName) ||
+        artistName.includes(t.artist.toLowerCase())
+      );
+      
+      console.log(`[SoundCloud] Search fallback found ${artistTracks.length} tracks for "${username}" (of ${allTracks.length} total)`);
+      return artistTracks.length > 0 ? artistTracks : allTracks;
+    } catch (error) {
+      console.error("[SoundCloud] Search fallback error:", error);
       return [];
     }
   }
